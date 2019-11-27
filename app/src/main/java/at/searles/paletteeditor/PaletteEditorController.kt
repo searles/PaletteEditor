@@ -8,7 +8,6 @@ class PaletteEditorController(val model: PaletteEditorModel, val view: PaletteEd
     init {
         if(view.model != model) {
             view.model = model
-            view.invalidate()
         }
 
         view.addListener(this)

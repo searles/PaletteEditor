@@ -1,43 +1,23 @@
 package at.searles.paletteeditor
 
+import android.content.Context
 import android.graphics.Canvas
+import android.util.AttributeSet
 import android.view.MotionEvent
+import android.view.View
 
 interface MultiScrollableDrawableCanvas {
 
-    val realWidth: Float
-    val realHeight: Float
+    val intendedWidth: Int
+    val intendedHeight: Int
 
-    val leftOffset: Float
-    val topOffset: Float
+    fun setOffset(left: Int, top: Int)
 
-    fun rx(vx: Float): Float {
-        return vx + leftOffset
-    }
-
-    fun ry(vy: Float): Float {
-        return vy + topOffset
-    }
-
-    fun vx(rx: Float): Float {
-        return rx - leftOffset
-    }
-
-    fun vy(ry: Float): Float {
-        return ry - topOffset
-    }
-
-    fun setOffset(left: Float, top: Float)
-
-    /**
-     * notifies view of a single click event
-     */
-    fun onDoubleClick(e: MotionEvent): Boolean
-
-    fun onLongPress(e: MotionEvent): Boolean
-    fun onSingleTapUp(e: MotionEvent): Boolean
-    fun onTapUp(e: MotionEvent): Boolean
-    fun onScrollTo(e: MotionEvent): Boolean
+    fun onClick(evt: MotionEvent): Boolean
+    fun onDoubleClick(evt: MotionEvent): Boolean
+    fun onLongPress(evt: MotionEvent): Boolean
+    fun onScrollTo(evt: MotionEvent): Boolean
+    fun onTapUp(event: MotionEvent): Boolean
 
     fun onDraw(canvas: Canvas)
 }

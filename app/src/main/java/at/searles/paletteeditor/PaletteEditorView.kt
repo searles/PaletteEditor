@@ -2,6 +2,7 @@ package at.searles.paletteeditor
 
 import android.content.Context
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
@@ -15,21 +16,24 @@ class PaletteEditorView(context: Context, attrs: AttributeSet) : MultiScrollable
             field?.removeListener(this)
             field = value
             field?.addListener(this)
-            invalidate()
-            requestLayout()
         }
 
-    override val realWidth: Float
-        get() = (model?.columnCount ?: 0) * (iconSize + spacing) - spacing
+    override val intendedWidth: Int
+        get() = 10000//((model?.columnCount ?: 0) * (iconSize + spacing) - spacing).toInt()
 
-    override val realHeight: Float
-        get() = (model?.rowCount ?: 0) * (iconSize + spacing) - spacing
+    override val intendedHeight: Int
+        get() = 10000//((model?.rowCount ?: 0) * (iconSize + spacing) - spacing).toInt()
 
-    override var leftOffset = 0f
-        private set
-
-    override var topOffset = 0f
-        private set
+    var leftOffset: Int = 0
+        set(value) {
+            field = value
+            invalidate()
+        }
+    var topOffset: Int = 0
+        set(value) {
+            field = value
+            invalidate()
+        }
 
     var iconSizeDp = 128
     var spacingDp = 4
@@ -48,56 +52,80 @@ class PaletteEditorView(context: Context, attrs: AttributeSet) : MultiScrollable
         strokeWidth = 4f
     }
 
-    override fun setOffset(left: Float, top: Float) {
+    override fun setOffset(left: Int, top: Int) {
         this.leftOffset = left
         this.topOffset = top
 
         invalidate()
     }
 
-    override fun onDoubleClick(e: MotionEvent): Boolean {
+    override fun onClick(evt: MotionEvent): Boolean {
         return false
     }
 
-    override fun onLongPress(e: MotionEvent): Boolean {
+    override fun onDoubleClick(evt: MotionEvent): Boolean {
         return false
     }
 
-    override fun onSingleTapUp(e: MotionEvent): Boolean {
-        // TODO
-        return false
-    }
+    var isDragging = false
 
-    override fun onTapUp(e: MotionEvent): Boolean {
-        return false
-    }
-
-    override fun onScrollTo(e: MotionEvent): Boolean {
+    override fun onLongPress(evt: MotionEvent): Boolean {
+        isDragging = true
         return true
     }
 
-    fun columnAt(rx: Float): Int = (rx / (iconSize + spacing)).toInt()
-    fun rowAt(ry: Float): Int = (ry / (iconSize + spacing)).toInt()
+    override fun onScrollTo(evt: MotionEvent): Boolean {
+        return isDragging
+    }
+
+    override fun onTapUp(event: MotionEvent): Boolean {
+        if(isDragging) {
+            isDragging = false
+            return true
+        }
+
+        return false
+    }
+
+    fun columnAt(x: Int): Int = (x / (iconSize + spacing)).toInt()
+    fun rowAt(y: Int): Int = (y / (iconSize + spacing)).toInt()
+
+
+//    override fun onDraw(canvas: Canvas) {
+//        for(x in 0 until intendedWidth step 100) {
+//            for(y in 0 until intendedHeight step 100) {
+//                with(paint) {
+//                    color =  Color.HSVToColor(floatArrayOf(((x + y) % 360).toFloat(), x.toFloat() / intendedWidth, y.toFloat() / intendedHeight))
+//                }
+//
+//                val x0 = (x - leftOffset).toFloat()
+//                val y0 = (y - topOffset).toFloat()
+//
+//                canvas.drawRect(x0, y0, x0 + 75, y0 + 75, paint)
+//            }
+//        }
+//    }
+
 
     override fun onDraw(canvas: Canvas) {
         if(model == null) {
-            return
+            //return
         }
 
-        val startCol = columnAt(rx(0f)) // fixme borders!
-        val endCol = columnAt(rx(width.toFloat()))
+        val startCol = columnAt(0 + leftOffset)
+        val endCol = columnAt(width + leftOffset)
 
-        val startRow = rowAt(ry(0f))
-        val endRow = rowAt(ry(height.toFloat()))
+        val startRow = rowAt(0 + topOffset)
+        val endRow = rowAt(height + topOffset)
 
         for(row in startRow .. endRow) {
             for (col in startCol..endCol) {
-                val x0 = vx(col * (iconSize + spacing))
-                val y0 = vy(row * (iconSize + spacing))
+                val x0 = (col * (iconSize + spacing) - leftOffset)
+                val y0 = (row * (iconSize + spacing) - topOffset)
 
-                val color = model!!.colorAt(col, row)
+                //val color = model!!.colorAt(col, row)
 
-                paint.color = color
+                paint.color = Color.HSVToColor(floatArrayOf(((x + y) % 360).toFloat(), x.toFloat() / intendedWidth, y.toFloat() / intendedHeight))
 
                 canvas.drawRect(x0, y0, x0 + iconSize, y0 + iconSize, paint)
             }

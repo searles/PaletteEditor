@@ -22,14 +22,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var controller: PaletteEditorController
 
     override fun onCreate(savedInstanceState: Bundle?) {
-            super.onCreate(savedInstanceState)
-            setContentView(R.layout.activity_main)
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
 
-         colorsView.adapter = ColorsAdapter()
+        colorsView.adapter = ColorsAdapter()
 
-         model = PaletteEditorModel()
-         controller = PaletteEditorController(model, paletteView)
-
-        colorsView.invalidate()
+        model = PaletteEditorModel()
+        controller = PaletteEditorController(model, paletteView)
     }
 }

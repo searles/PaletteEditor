@@ -13,6 +13,9 @@ import android.widget.ScrollView
 import java.util.*
 import kotlin.math.sqrt
 
+/**
+ * Thanks to http://stackoverflow.com/questions/12074950/android-horizontalscrollview-inside-scrollview
+ */
 class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayout(context, attributeSet) {
 
     private val hscroll: HorizontalScrollView by lazy {
@@ -68,7 +71,11 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
                 if(isWithinBorderScrollingMargin(e)) {
                     updateBorderScrolling(e)
                     return true
+                } else {
+                    cancelBorderScrolling()
                 }
+
+                return true
             }
         } else if (e.action == MotionEvent.ACTION_UP) {
             cancelBorderScrolling()
@@ -94,7 +101,7 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
         scrollDirectionX = dx / d
         scrollDirectionY = dy / d
 
-        currentScrollStepSize = Dpis.dpiToPx(resources, initialBorderScrollStepSizeDp)
+        currentScrollStepSize = initialBorderScrollStepSize
 
         if(scrollDragTimer == null) {
             scrollDragTimer = Timer()
@@ -112,24 +119,26 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
     }
 
     private fun updateViewCoordinates() {
-        drawableCanvas.setOffset(hscroll.scrollX.toFloat(), vscroll.scrollY.toFloat())
+        drawableCanvas.setOffset(hscroll.scrollX, vscroll.scrollY)
     }
 
     private fun updateSize() {
         with(hspace) {
-            minimumWidth = drawableCanvas.realWidth.toInt()
-            layoutParams.width = drawableCanvas.realWidth.toInt()
+            minimumWidth = drawableCanvas.intendedWidth
+            layoutParams.width = drawableCanvas.intendedWidth
         }
 
         with(vspace) {
-            minimumHeight = drawableCanvas.realHeight.toInt()
-            vspace.layoutParams.height = drawableCanvas.realHeight.toInt()
+            minimumHeight = drawableCanvas.intendedHeight
+            vspace.layoutParams.height = drawableCanvas.intendedHeight
         }
     }
 
     private inner class BorderScrollUpdateTask: TimerTask() {
         override fun run() {
-            currentScrollStepSize *= borderScrollAcceleration
+            if (currentScrollStepSize < maxBorderScrollStepSize) {
+                currentScrollStepSize *= borderScrollAcceleration
+            }
 
             hscroll.scrollX = hscroll.scrollX + (scrollDirectionX * currentScrollStepSize).toInt()
             vscroll.scrollY = vscroll.scrollY + (scrollDirectionY * currentScrollStepSize).toInt()
@@ -138,7 +147,7 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
 
     private inner class GestureController : SimpleOnGestureListener() {
         override fun onSingleTapUp(e: MotionEvent): Boolean {
-            return drawableCanvas.onSingleTapUp(e)
+            return drawableCanvas.onClick(e)
         }
 
         override fun onDoubleTap(e: MotionEvent): Boolean {
@@ -151,9 +160,10 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
     }
 
     companion object {
-        val borderScrollMargin = 64
-        val initialBorderScrollStepSizeDp = 25f
-        val borderScrollAcceleration = 1.04f
+        val borderScrollMargin = 64 // FIXME this one as property!
+        val initialBorderScrollStepSize = 24f
+        val maxBorderScrollStepSize = 240f
         val borderScrollUpdateDelayMs = 40L
+        val borderScrollAcceleration = 1.05f
     }
 }
