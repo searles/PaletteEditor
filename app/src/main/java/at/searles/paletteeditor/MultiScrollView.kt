@@ -62,23 +62,23 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
         drawableCanvas.onDraw(canvas)
     }
 
-    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
-        if (event.action == MotionEvent.ACTION_MOVE) {
-            if(drawableCanvas.onMoveTo(event)) {
-                if(isWithinBorderScrollingMargin(event)) {
-                    updateBorderScrolling(event)
+    override fun dispatchTouchEvent(e: MotionEvent): Boolean {
+        if (e.action == MotionEvent.ACTION_MOVE) {
+            if(drawableCanvas.onScrollTo(e)) {
+                if(isWithinBorderScrollingMargin(e)) {
+                    updateBorderScrolling(e)
                     return true
                 }
             }
-        } else if (event.action == MotionEvent.ACTION_UP) {
+        } else if (e.action == MotionEvent.ACTION_UP) {
             cancelBorderScrolling()
-            if (drawableCanvas.onTapUp(event)) {
+            if (drawableCanvas.onTapUp(e)) {
                 return true
             }
         }
 
-        return gestureDetector.onTouchEvent(event)
-                || (hscroll.dispatchTouchEvent(event) or vscroll.dispatchTouchEvent(event))
+        return gestureDetector.onTouchEvent(e)
+                || (hscroll.dispatchTouchEvent(e) or vscroll.dispatchTouchEvent(e))
     }
 
     private fun isWithinBorderScrollingMargin(event: MotionEvent): Boolean {
@@ -117,13 +117,13 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
 
     private fun updateSize() {
         with(hspace) {
-            minimumWidth = drawableCanvas.intendedWidth.toInt()
-            layoutParams.width = drawableCanvas.intendedWidth.toInt()
+            minimumWidth = drawableCanvas.realWidth.toInt()
+            layoutParams.width = drawableCanvas.realWidth.toInt()
         }
 
         with(vspace) {
-            minimumHeight = drawableCanvas.intendedHeight.toInt()
-            vspace.layoutParams.height = drawableCanvas.intendedHeight.toInt()
+            minimumHeight = drawableCanvas.realHeight.toInt()
+            vspace.layoutParams.height = drawableCanvas.realHeight.toInt()
         }
     }
 
@@ -142,7 +142,7 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
         }
 
         override fun onDoubleTap(e: MotionEvent): Boolean {
-            return drawableCanvas.onDoubleTap(e)
+            return drawableCanvas.onDoubleClick(e)
         }
 
         override fun onLongPress(e: MotionEvent) {

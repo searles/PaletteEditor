@@ -18,10 +18,18 @@ class MainActivity : AppCompatActivity() {
         findViewById<PaletteEditorView>(R.id.paletteView)
     }
 
-     override fun onCreate(savedInstanceState: Bundle?) {
+    private lateinit var model: PaletteEditorModel
+    private lateinit var controller: PaletteEditorController
+
+    override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
             setContentView(R.layout.activity_main)
 
          colorsView.adapter = ColorsAdapter()
+
+         model = PaletteEditorModel()
+         controller = PaletteEditorController(model, paletteView)
+
+        colorsView.invalidate()
     }
 }

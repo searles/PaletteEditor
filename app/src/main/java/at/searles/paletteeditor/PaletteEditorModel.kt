@@ -3,16 +3,16 @@ package at.searles.paletteeditor
 class PaletteEditorModel {
     private val listeners = ArrayList<Listener>()
 
-    var columnCount: Int = 0
+    var columnCount: Int = 11110
         private set
-    var rowCount: Int = 0
+    var rowCount: Int = 11110
         private set
 
     private val colorPoints = HashMap<Pair<Int, Int>, Int>()
 
     fun colorAt(col: Int, row: Int): Int {
         if(colorPoints.isEmpty()) {
-            return neutralColor
+            //return neutralColor
         }
 
         // TODO must interpolate.

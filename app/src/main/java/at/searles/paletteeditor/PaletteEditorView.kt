@@ -15,16 +15,21 @@ class PaletteEditorView(context: Context, attrs: AttributeSet) : MultiScrollable
             field?.removeListener(this)
             field = value
             field?.addListener(this)
+            invalidate()
+            requestLayout()
         }
 
-    override val intendedWidth: Float
+    override val realWidth: Float
         get() = (model?.columnCount ?: 0) * (iconSize + spacing) - spacing
 
-    override val intendedHeight: Float
+    override val realHeight: Float
         get() = (model?.rowCount ?: 0) * (iconSize + spacing) - spacing
 
-    private var leftOffset = 0f
-    private var topOffset = 0f
+    override var leftOffset = 0f
+        private set
+
+    override var topOffset = 0f
+        private set
 
     var iconSizeDp = 128
     var spacingDp = 4
@@ -50,44 +55,45 @@ class PaletteEditorView(context: Context, attrs: AttributeSet) : MultiScrollable
         invalidate()
     }
 
-    override fun onSingleTapUp(evt: MotionEvent): Boolean {
+    override fun onDoubleClick(e: MotionEvent): Boolean {
         return false
     }
 
-    override fun onDoubleTap(evt: MotionEvent): Boolean {
+    override fun onLongPress(e: MotionEvent): Boolean {
         return false
     }
 
-    override fun onLongPress(evt: MotionEvent): Boolean {
+    override fun onSingleTapUp(e: MotionEvent): Boolean {
+        // TODO
         return false
     }
 
-    override fun onMoveTo(evt: MotionEvent): Boolean {
+    override fun onTapUp(e: MotionEvent): Boolean {
         return false
     }
 
-    override fun onTapUp(event: MotionEvent): Boolean {
-        return false
+    override fun onScrollTo(e: MotionEvent): Boolean {
+        return true
     }
 
-    fun columnAt(x: Float): Int = (x / (iconSize + spacing)).toInt()
-    fun rowAt(y: Float): Int = (y / (iconSize + spacing)).toInt()
+    fun columnAt(rx: Float): Int = (rx / (iconSize + spacing)).toInt()
+    fun rowAt(ry: Float): Int = (ry / (iconSize + spacing)).toInt()
 
     override fun onDraw(canvas: Canvas) {
         if(model == null) {
             return
         }
 
-        val startCol = columnAt(0 + leftOffset)
-        val endCol = columnAt(width + leftOffset)
+        val startCol = columnAt(rx(0f)) // fixme borders!
+        val endCol = columnAt(rx(width.toFloat()))
 
-        val startRow = rowAt(0 + topOffset)
-        val endRow = rowAt(height + topOffset)
+        val startRow = rowAt(ry(0f))
+        val endRow = rowAt(ry(height.toFloat()))
 
         for(row in startRow .. endRow) {
             for (col in startCol..endCol) {
-                val x0 = (col * (iconSize + spacing) - leftOffset)
-                val y0 = (row * (iconSize + spacing) - topOffset)
+                val x0 = vx(col * (iconSize + spacing))
+                val y0 = vy(row * (iconSize + spacing))
 
                 val color = model!!.colorAt(col, row)
 
