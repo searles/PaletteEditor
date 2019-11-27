@@ -18,6 +18,12 @@ import kotlin.math.sqrt
  */
 class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayout(context, attributeSet) {
 
+    var borderScrollMargin = 128f
+    var initialBorderScrollStepSize = 24f
+    var maxBorderScrollStepSize = 240f
+    var borderScrollUpdateDelayMs = 40L
+    var borderScrollAcceleration = 1.05f
+
     private val hscroll: HorizontalScrollView by lazy {
         findViewById<HorizontalScrollView>(R.id.hscroll)
     }
@@ -49,9 +55,10 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
         hscroll.viewTreeObserver.addOnScrollChangedListener { updateViewCoordinates() }
         vscroll.viewTreeObserver.addOnScrollChangedListener { updateViewCoordinates() }
 
-        updateSize()
-
-        post { updateViewCoordinates() }
+        post {
+            updateSize()
+            updateViewCoordinates()
+        }
     }
 
     private var currentScrollStepSize = 0f
@@ -101,10 +108,10 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
         scrollDirectionX = dx / d
         scrollDirectionY = dy / d
 
-        currentScrollStepSize = initialBorderScrollStepSize
-
         if(scrollDragTimer == null) {
             scrollDragTimer = Timer()
+            currentScrollStepSize = initialBorderScrollStepSize
+
             scrollDragTimer!!.scheduleAtFixedRate(
                 BorderScrollUpdateTask(),
                 0,
@@ -157,13 +164,5 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
         override fun onLongPress(e: MotionEvent) {
             drawableCanvas.onLongPress(e)
         }
-    }
-
-    companion object {
-        val borderScrollMargin = 64 // FIXME this one as property!
-        val initialBorderScrollStepSize = 24f
-        val maxBorderScrollStepSize = 240f
-        val borderScrollUpdateDelayMs = 40L
-        val borderScrollAcceleration = 1.05f
     }
 }

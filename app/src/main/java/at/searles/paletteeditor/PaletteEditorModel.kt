@@ -3,10 +3,16 @@ package at.searles.paletteeditor
 class PaletteEditorModel {
     private val listeners = ArrayList<Listener>()
 
-    var columnCount: Int = 0
-        private set
-    var rowCount: Int = 0
-        private set
+    var columnCount: Int = 3
+        private set(value) {
+            field = value
+            listeners.forEach { it.onPaletteSizeChanged(this) }
+        }
+    var rowCount: Int = 3
+        private set(value) {
+            field = value
+            listeners.forEach { it.onPaletteSizeChanged(this) }
+        }
 
     private val colorPoints = HashMap<Pair<Int, Int>, Int>()
 
@@ -14,6 +20,8 @@ class PaletteEditorModel {
         //if(colorPoints.isEmpty()) {
           //  return neutralColor
         //}
+
+        require(col < columnCount && row < rowCount) {"out of bounds"}
 
         // TODO must interpolate.
         return alphaMask or (col * row)
@@ -57,7 +65,9 @@ class PaletteEditorModel {
         listeners.add(listener)
     }
 
-    interface Listener
+    interface Listener {
+        fun onPaletteSizeChanged(paletteEditorModel: PaletteEditorModel)
+    }
 
     companion object {
         private val alphaMask = 0xff000000.toInt()

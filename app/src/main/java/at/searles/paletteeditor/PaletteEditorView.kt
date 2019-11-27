@@ -7,22 +7,27 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import kotlin.math.max
+import kotlin.math.min
 
 class PaletteEditorView(context: Context, attrs: AttributeSet) : MultiScrollableDrawableCanvas, View(context, attrs), PaletteEditorModel.Listener {
-    private val listeners = ArrayList<Listener>(1)
+
+    var iconSize = 128
+    var spacing = 4
 
     var model: PaletteEditorModel? = null
         set(value) {
             field?.removeListener(this)
             field = value
             field?.addListener(this)
+            requestLayout()
         }
 
     override val intendedWidth: Int
-        get() = 10000//((model?.columnCount ?: 0) * (iconSize + spacing) - spacing).toInt()
+        get() = if(model == null) 0 else model!!.columnCount * (iconSize + spacing) - spacing
 
     override val intendedHeight: Int
-        get() = 10000//((model?.rowCount ?: 0) * (iconSize + spacing) - spacing).toInt()
+        get() = if(model == null) 0 else model!!.rowCount * (iconSize + spacing) - spacing
 
     var leftOffset: Int = 0
         set(value) {
@@ -35,22 +40,9 @@ class PaletteEditorView(context: Context, attrs: AttributeSet) : MultiScrollable
             invalidate()
         }
 
-    var iconSizeDp = 128
-    var spacingDp = 4
+    private val listeners = ArrayList<Listener>(1)
 
-    private val iconSize: Float
-        get() {
-            return Dpis.dpiToPx(resources, iconSizeDp.toFloat())
-        }
-
-    private val spacing: Float
-        get() {
-            return Dpis.dpiToPx(resources, spacingDp.toFloat())
-        }
-
-    private val paint = Paint().apply{
-        strokeWidth = 4f
-    }
+    private val paint = Paint()
 
     override fun setOffset(left: Int, top: Int) {
         this.leftOffset = left
@@ -87,29 +79,12 @@ class PaletteEditorView(context: Context, attrs: AttributeSet) : MultiScrollable
         return false
     }
 
-    fun columnAt(x: Int): Int = (x / (iconSize + spacing)).toInt()
-    fun rowAt(y: Int): Int = (y / (iconSize + spacing)).toInt()
-
-
-//    override fun onDraw(canvas: Canvas) {
-//        for(x in 0 until intendedWidth step 100) {
-//            for(y in 0 until intendedHeight step 100) {
-//                with(paint) {
-//                    color =  Color.HSVToColor(floatArrayOf(((x + y) % 360).toFloat(), x.toFloat() / intendedWidth, y.toFloat() / intendedHeight))
-//                }
-//
-//                val x0 = (x - leftOffset).toFloat()
-//                val y0 = (y - topOffset).toFloat()
-//
-//                canvas.drawRect(x0, y0, x0 + 75, y0 + 75, paint)
-//            }
-//        }
-//    }
-
+    fun columnAt(x: Int): Int = max(0, min(model!!.columnCount - 1, x / (iconSize + spacing)))
+    fun rowAt(y: Int): Int = max(0, min(model!!.rowCount - 1, y / (iconSize + spacing)))
 
     override fun onDraw(canvas: Canvas) {
         if(model == null) {
-            //return
+            return
         }
 
         val startCol = columnAt(0 + leftOffset)
@@ -120,12 +95,12 @@ class PaletteEditorView(context: Context, attrs: AttributeSet) : MultiScrollable
 
         for(row in startRow .. endRow) {
             for (col in startCol..endCol) {
-                val x0 = (col * (iconSize + spacing) - leftOffset)
-                val y0 = (row * (iconSize + spacing) - topOffset)
+                val x0 = (col * (iconSize + spacing) - leftOffset).toFloat()
+                val y0 = (row * (iconSize + spacing) - topOffset).toFloat()
 
-                //val color = model!!.colorAt(col, row)
+                val color = model!!.colorAt(col, row)
 
-                paint.color = Color.HSVToColor(floatArrayOf(((x + y) % 360).toFloat(), x.toFloat() / intendedWidth, y.toFloat() / intendedHeight))
+                paint.color = color
 
                 canvas.drawRect(x0, y0, x0 + iconSize, y0 + iconSize, paint)
             }
@@ -142,5 +117,10 @@ class PaletteEditorView(context: Context, attrs: AttributeSet) : MultiScrollable
 
     interface Listener {
 
+    }
+
+    override fun onPaletteSizeChanged(paletteEditorModel: PaletteEditorModel) {
+        invalidate()
+        // TODO
     }
 }
