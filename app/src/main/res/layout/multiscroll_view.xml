@@ -4,10 +4,10 @@
     android:layout_height="match_parent"
     android:id="@+id/ms_layout">
 
-    <at.searles.paletteeditor.PaletteEditorView
+    <at.searles.multiscrollview.InnerPaneView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/paletteView"
+        android:id="@+id/innerPaneView"
         android:layout_gravity="center_horizontal" />
 
     <HorizontalScrollView

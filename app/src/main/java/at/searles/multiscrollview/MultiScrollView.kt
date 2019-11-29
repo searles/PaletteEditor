@@ -1,4 +1,4 @@
-package at.searles.paletteeditor
+package at.searles.multiscrollview
 
 import android.content.Context
 import android.graphics.Canvas
@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.ScrollView
+import at.searles.paletteeditor.R
 import java.util.*
 import kotlin.math.sqrt
 
@@ -45,12 +46,13 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
         GestureDetector(context, GestureController())
     }
 
-    private val drawableCanvas: MultiScrollableDrawableCanvas by lazy {
-        findViewById<View>(R.id.paletteView) as MultiScrollableDrawableCanvas
+    private val innerPaneView: InnerPaneView by lazy {
+        findViewById<View>(R.id.innerPaneView) as InnerPaneView
     }
 
     init {
-        View.inflate(context, R.layout.multiscroll_view, this)
+        View.inflate(context,
+            R.layout.multiscroll_view, this)
 
         hscroll.viewTreeObserver.addOnScrollChangedListener { updateViewCoordinates() }
         vscroll.viewTreeObserver.addOnScrollChangedListener { updateViewCoordinates() }
@@ -69,12 +71,12 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
     private var scrollDragTimer: Timer? = null
 
     public override fun onDraw(canvas: Canvas) {
-        drawableCanvas.onDraw(canvas)
+        innerPaneView.draw(canvas)
     }
 
     override fun dispatchTouchEvent(e: MotionEvent): Boolean {
         if (e.action == MotionEvent.ACTION_MOVE) {
-            if(drawableCanvas.onScrollTo(e)) {
+            if(innerPaneView.onScrollTo(e)) {
                 if(isWithinBorderScrollingMargin(e)) {
                     updateBorderScrolling(e)
                     return true
@@ -86,7 +88,7 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
             }
         } else if (e.action == MotionEvent.ACTION_UP) {
             cancelBorderScrolling()
-            if (drawableCanvas.onTapUp(e)) {
+            if (innerPaneView.onTapUp(e)) {
                 return true
             }
         }
@@ -126,18 +128,19 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
     }
 
     private fun updateViewCoordinates() {
-        drawableCanvas.setOffset(hscroll.scrollX, vscroll.scrollY)
+        innerPaneView.visibleX0 = hscroll.scrollX
+        innerPaneView.visibleY0 = vscroll.scrollY
     }
 
     private fun updateSize() {
         with(hspace) {
-            minimumWidth = drawableCanvas.intendedWidth
-            layoutParams.width = drawableCanvas.intendedWidth
+            minimumWidth = innerPaneView.intendedWidth
+            layoutParams.width = innerPaneView.intendedWidth
         }
 
         with(vspace) {
-            minimumHeight = drawableCanvas.intendedHeight
-            vspace.layoutParams.height = drawableCanvas.intendedHeight
+            minimumHeight = innerPaneView.intendedHeight
+            vspace.layoutParams.height = innerPaneView.intendedHeight
         }
     }
 
@@ -154,15 +157,15 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
 
     private inner class GestureController : SimpleOnGestureListener() {
         override fun onSingleTapUp(e: MotionEvent): Boolean {
-            return drawableCanvas.onClick(e)
+            return innerPaneView.onClick(e)
         }
 
         override fun onDoubleTap(e: MotionEvent): Boolean {
-            return drawableCanvas.onDoubleClick(e)
+            return innerPaneView.onDoubleClick(e)
         }
 
         override fun onLongPress(e: MotionEvent) {
-            drawableCanvas.onLongPress(e)
+            innerPaneView.onLongPress(e)
         }
     }
 }

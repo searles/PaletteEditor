@@ -15,7 +15,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <at.searles.paletteeditor.MultiScrollView
+    <at.searles.multiscrollview.MultiScrollView
         android:id="@+id/multiScrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"

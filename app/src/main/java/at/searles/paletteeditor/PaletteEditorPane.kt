@@ -1,76 +1,64 @@
 package at.searles.paletteeditor
 
-import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
-import android.util.AttributeSet
 import android.view.MotionEvent
-import android.view.View
+import at.searles.multiscrollview.InnerPane
+import at.searles.multiscrollview.InnerPaneView
 import kotlin.math.max
 import kotlin.math.min
 
-class PaletteEditorView(context: Context, attrs: AttributeSet) : MultiScrollableDrawableCanvas, View(context, attrs), PaletteEditorModel.Listener {
+/*
+Offset bars:
 
-    var iconSize = 128
-    var spacing = 4
+CompositeView:
+
+ */
+
+class PaletteEditorPane(private val rootView: InnerPaneView): InnerPane, PaletteEditorModel.Listener {
+    var iconSize = 32
+    // FIXME set
+    var spacing = 0
+    // FIXME set
 
     var model: PaletteEditorModel? = null
         set(value) {
             field?.removeListener(this)
             field = value
             field?.addListener(this)
-            requestLayout()
+            rootView.requestLayout()
         }
 
-    override val intendedWidth: Int
+    override val width: Int
         get() = if(model == null) 0 else model!!.columnCount * (iconSize + spacing) - spacing
 
-    override val intendedHeight: Int
+    override val height: Int
         get() = if(model == null) 0 else model!!.rowCount * (iconSize + spacing) - spacing
-
-    var leftOffset: Int = 0
-        set(value) {
-            field = value
-            invalidate()
-        }
-    var topOffset: Int = 0
-        set(value) {
-            field = value
-            invalidate()
-        }
 
     private val listeners = ArrayList<Listener>(1)
 
     private val paint = Paint()
 
-    override fun setOffset(left: Int, top: Int) {
-        this.leftOffset = left
-        this.topOffset = top
-
-        invalidate()
-    }
-
-    override fun onClick(evt: MotionEvent): Boolean {
+    override fun onClick(e: MotionEvent, visibleX0: Int, visibleY0: Int, visibleWidth: Int, visibleHeight: Int): Boolean {
         return false
     }
 
-    override fun onDoubleClick(evt: MotionEvent): Boolean {
+    override fun onDoubleClick(e: MotionEvent, visibleX0: Int, visibleY0: Int, visibleWidth: Int, visibleHeight: Int): Boolean {
         return false
     }
 
     var isDragging = false
 
-    override fun onLongPress(evt: MotionEvent): Boolean {
+    override fun onLongPress(e: MotionEvent, visibleX0: Int, visibleY0: Int, visibleWidth: Int, visibleHeight: Int): Boolean {
         isDragging = true
         return true
     }
 
-    override fun onScrollTo(evt: MotionEvent): Boolean {
+    override fun onScrollTo(e: MotionEvent, visibleX0: Int, visibleY0: Int, visibleWidth: Int, visibleHeight: Int): Boolean {
         return isDragging
     }
 
-    override fun onTapUp(event: MotionEvent): Boolean {
+    override fun onTapUp(e: MotionEvent, visibleX0: Int, visibleY0: Int, visibleWidth: Int, visibleHeight: Int): Boolean {
         if(isDragging) {
             isDragging = false
             return true
@@ -82,21 +70,21 @@ class PaletteEditorView(context: Context, attrs: AttributeSet) : MultiScrollable
     fun columnAt(x: Int): Int = max(0, min(model!!.columnCount - 1, x / (iconSize + spacing)))
     fun rowAt(y: Int): Int = max(0, min(model!!.rowCount - 1, y / (iconSize + spacing)))
 
-    override fun onDraw(canvas: Canvas) {
+    override fun onDraw(canvas: Canvas, visibleX0: Int, visibleY0: Int, visibleWidth: Int, visibleHeight: Int) {
         if(model == null) {
             return
         }
 
-        val startCol = columnAt(0 + leftOffset)
-        val endCol = columnAt(width + leftOffset)
+        val startCol = columnAt(0 + visibleX0)
+        val endCol = columnAt(visibleWidth + visibleX0)
 
-        val startRow = rowAt(0 + topOffset)
-        val endRow = rowAt(height + topOffset)
+        val startRow = rowAt(0 + visibleY0)
+        val endRow = rowAt(visibleHeight + visibleY0)
 
         for(row in startRow .. endRow) {
             for (col in startCol..endCol) {
-                val x0 = (col * (iconSize + spacing) - leftOffset).toFloat()
-                val y0 = (row * (iconSize + spacing) - topOffset).toFloat()
+                val x0 = (col * (iconSize + spacing) - visibleX0).toFloat()
+                val y0 = (row * (iconSize + spacing) - visibleY0).toFloat()
 
                 val color = model!!.colorAt(col, row)
 
@@ -120,7 +108,11 @@ class PaletteEditorView(context: Context, attrs: AttributeSet) : MultiScrollable
     }
 
     override fun onPaletteSizeChanged(paletteEditorModel: PaletteEditorModel) {
-        invalidate()
-        // TODO
+        rootView.requestLayout()
+        rootView.invalidate()
+    }
+
+    override fun onOffsetChanged(paletteEditorModel: PaletteEditorModel) {
+        // nothing to do for this view.
     }
 }

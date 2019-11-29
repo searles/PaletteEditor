@@ -1,17 +1,17 @@
 package at.searles.paletteeditor
 
-class PaletteEditorController(val model: PaletteEditorModel, val view: PaletteEditorView): PaletteEditorView.Listener {
+class PaletteEditorController(val model: PaletteEditorModel, val pane: PaletteEditorPane): PaletteEditorPane.Listener {
 
     private var selectedRow = -1
     private var selectedCol = -1
 
     init {
-        if(view.model != model) {
-            view.model = model
+        if(pane.model != model) {
+            pane.model = model
         }
 
-        view.addListener(this)
+        pane.addListener(this)
     }
 
-    private object ViewListener: PaletteEditorView.Listener
+    private object ViewListener: PaletteEditorPane.Listener
 }
