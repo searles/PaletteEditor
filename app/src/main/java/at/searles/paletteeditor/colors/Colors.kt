@@ -1,5 +1,8 @@
 package at.searles.paletteeditor.colors
 
+import android.graphics.Color
+import at.searles.paletteeditor.HorizontalControlPane
+
 /**
  * Colors can come in two flavors: as integers in AARRGGBB-Format, or
  * as float[4]-arrays in rgba-format or laba-format.
@@ -59,4 +62,7 @@ object Colors {
         throw ColorFormatException("bad format: $color")
     }
 
+    fun transparent(alpha: Float, color: Int): Int {
+        return Color.argb((Color.alpha(color) * alpha).toInt(), Color.red(color), Color.green(color), Color.blue(color))
+    }
 }

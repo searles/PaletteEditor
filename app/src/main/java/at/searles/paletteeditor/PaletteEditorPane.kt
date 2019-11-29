@@ -8,18 +8,20 @@ import at.searles.multiscrollview.InnerPaneView
 import kotlin.math.max
 import kotlin.math.min
 
-/*
-Offset bars:
-
-CompositeView:
-
- */
-
 class PaletteEditorPane(private val rootView: InnerPaneView): InnerPane, PaletteEditorModel.Listener {
-    var iconSize = 32
-    // FIXME set
-    var spacing = 0
-    // FIXME set
+    var iconSize = Dpis.dpiToPx(rootView.resources, defaultIconSizeDp).toInt()
+        set(value) {
+            field = value
+            rootView.requestLayout()
+            rootView.invalidate()
+        }
+
+    var spacing = Dpis.dpiToPx(rootView.resources, defaultSpacingDp).toInt()
+        set(value) {
+            field = value
+            rootView.requestLayout()
+            rootView.invalidate()
+        }
 
     var model: PaletteEditorModel? = null
         set(value) {
@@ -30,10 +32,10 @@ class PaletteEditorPane(private val rootView: InnerPaneView): InnerPane, Palette
         }
 
     override val width: Int
-        get() = if(model == null) 0 else model!!.columnCount * (iconSize + spacing) - spacing
+        get() = if(model == null) 0 else model!!.columnCount * (iconSize + spacing)
 
     override val height: Int
-        get() = if(model == null) 0 else model!!.rowCount * (iconSize + spacing) - spacing
+        get() = if(model == null) 0 else model!!.rowCount * (iconSize + spacing)
 
     private val listeners = ArrayList<Listener>(1)
 
@@ -114,5 +116,10 @@ class PaletteEditorPane(private val rootView: InnerPaneView): InnerPane, Palette
 
     override fun onOffsetChanged(paletteEditorModel: PaletteEditorModel) {
         // nothing to do for this view.
+    }
+
+    companion object {
+        val defaultIconSizeDp = 48f
+        val defaultSpacingDp = 8f
     }
 }

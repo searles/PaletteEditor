@@ -27,13 +27,13 @@ class PaletteEditorModel {
 
     private val colorPoints = SparseArray<SparseArray<Lab>>() // [row][col]
 
-    private var offsetX: Float = 0f
+    var offsetX: Float = 0f
         set(value) {
             field = value
             listeners.forEach { it.onOffsetChanged(this) }
         }
 
-    private var offsetY: Float = 0f
+    var offsetY: Float = 0f
         set(value) {
             field = value
             listeners.forEach { it.onOffsetChanged(this) }
