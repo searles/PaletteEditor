@@ -5,6 +5,7 @@ import android.graphics.Paint
 import android.view.MotionEvent
 import at.searles.multiscrollview.InnerPane
 import at.searles.multiscrollview.InnerPaneView
+import at.searles.multiscrollview.ScrollDirection
 import kotlin.math.max
 import kotlin.math.min
 
@@ -41,26 +42,30 @@ class PaletteEditorPane(private val rootView: InnerPaneView): InnerPane, Palette
 
     private val paint = Paint()
 
-    override fun onClick(e: MotionEvent, visibleX0: Int, visibleY0: Int, visibleWidth: Int, visibleHeight: Int): Boolean {
+    override fun onClick(e: MotionEvent, visibleX0: Int, visibleY0: Int): Boolean {
         return false
     }
 
-    override fun onDoubleClick(e: MotionEvent, visibleX0: Int, visibleY0: Int, visibleWidth: Int, visibleHeight: Int): Boolean {
+    override fun onDoubleClick(e: MotionEvent, visibleX0: Int, visibleY0: Int): Boolean {
         return false
     }
 
     var isDragging = false
 
-    override fun onLongPress(e: MotionEvent, visibleX0: Int, visibleY0: Int, visibleWidth: Int, visibleHeight: Int): Boolean {
+    override fun onLongPress(e: MotionEvent, visibleX0: Int, visibleY0: Int): Boolean {
         isDragging = true
         return true
     }
 
-    override fun onScrollTo(e: MotionEvent, visibleX0: Int, visibleY0: Int, visibleWidth: Int, visibleHeight: Int): Boolean {
-        return isDragging
+    override fun onTapDown(e: MotionEvent, visibleX0: Int, visibleY0: Int): Boolean {
+        return false
     }
 
-    override fun onTapUp(e: MotionEvent, visibleX0: Int, visibleY0: Int, visibleWidth: Int, visibleHeight: Int): Boolean {
+    override fun onScrollTo(e: MotionEvent, visibleX0: Int, visibleY0: Int): ScrollDirection {
+        return if(isDragging) ScrollDirection.Both else ScrollDirection.NoScroll
+    }
+
+    override fun onTapUp(e: MotionEvent, visibleX0: Int, visibleY0: Int): Boolean {
         if(isDragging) {
             isDragging = false
             return true

@@ -12,18 +12,21 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import at.searles.paletteeditor.R
 import java.util.*
-import kotlin.math.sqrt
 
 /**
  * Thanks to http://stackoverflow.com/questions/12074950/android-horizontalscrollview-inside-scrollview
  */
 class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayout(context, attributeSet) {
 
-    var borderScrollMargin = 128f
-    var initialBorderScrollStepSize = 24f
-    var maxBorderScrollStepSize = 240f
-    var borderScrollUpdateDelayMs = 40L
-    var borderScrollAcceleration = 1.05f
+    var borderScrollMargin = 128f // FIXME dp-dependant
+
+    private val initialBorderScrollStepSize
+        get() = borderScrollMargin / 5f
+    private val maxBorderScrollStepSize
+        get() = borderScrollMargin * 2f
+
+    private val borderScrollUpdateDelayMs = 40L
+    private val borderScrollAcceleration = 1.05f
 
     private val hscroll: HorizontalScrollView by lazy {
         findViewById<HorizontalScrollView>(R.id.hscroll)
@@ -57,6 +60,12 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
         hscroll.viewTreeObserver.addOnScrollChangedListener { updateViewCoordinates() }
         vscroll.viewTreeObserver.addOnScrollChangedListener { updateViewCoordinates() }
 
+        innerPaneView.listener = object: InnerPaneView.OnIntendedSizeChangedObserver {
+            override fun intendedSizeChanged() {
+                updateSize()
+            }
+        }
+
         post {
             updateSize()
             updateViewCoordinates()
@@ -76,9 +85,10 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
 
     override fun dispatchTouchEvent(e: MotionEvent): Boolean {
         if (e.action == MotionEvent.ACTION_MOVE) {
-            if(innerPaneView.onScrollTo(e)) {
-                if(isWithinBorderScrollingMargin(e)) {
-                    updateBorderScrolling(e)
+            val scrollDirection = innerPaneView.onScrollTo(e)
+
+            if(scrollDirection != ScrollDirection.NoScroll) {
+                if(isBorderScrolling(e, scrollDirection)) {
                     return true
                 } else {
                     cancelBorderScrolling()
@@ -91,24 +101,38 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
             if (innerPaneView.onTapUp(e)) {
                 return true
             }
+        } else if (e.action == MotionEvent.ACTION_DOWN) {
+            if (innerPaneView.onTapDown(e)) {
+                return true
+            }
         }
 
         return gestureDetector.onTouchEvent(e)
                 || (hscroll.dispatchTouchEvent(e) or vscroll.dispatchTouchEvent(e))
     }
 
-    private fun isWithinBorderScrollingMargin(event: MotionEvent): Boolean {
-        return event.x < borderScrollMargin || event.y < borderScrollMargin || event.x > width - borderScrollMargin || event.y > height - borderScrollMargin
-    }
+    private fun isBorderScrolling(
+        event: MotionEvent,
+        scrollDirection: ScrollDirection
+    ): Boolean {
+        val dx = when {
+            scrollDirection.isHorizontal && event.x < borderScrollMargin -> event.x - borderScrollMargin
+            scrollDirection.isHorizontal && event.x > width - borderScrollMargin -> event.x - width + borderScrollMargin
+            else -> 0f
+        }
 
-    private fun updateBorderScrolling(event: MotionEvent) {
-        val dx = event.x - width / 2f
-        val dy = event.y - height / 2f
+        val dy = when {
+            scrollDirection.isVertical && event.y < borderScrollMargin -> event.y - borderScrollMargin
+            scrollDirection.isVertical && event.y > height - borderScrollMargin -> event.y - height + borderScrollMargin
+            else -> 0f
+        }
 
-        val d = sqrt(dx * dx + dy * dy)
+        if(dx == 0f && dy == 0f) {
+            return false
+        }
 
-        scrollDirectionX = dx / d
-        scrollDirectionY = dy / d
+        scrollDirectionX = dx / borderScrollMargin
+        scrollDirectionY = dy / borderScrollMargin
 
         if(scrollDragTimer == null) {
             scrollDragTimer = Timer()
@@ -120,6 +144,8 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
                 borderScrollUpdateDelayMs
             )
         }
+
+        return true
     }
 
     private fun cancelBorderScrolling() {
@@ -134,12 +160,12 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
 
     private fun updateSize() {
         with(hspace) {
-            minimumWidth = innerPaneView.intendedWidth
-            layoutParams.width = innerPaneView.intendedWidth
+            hspace.minimumWidth = innerPaneView.intendedWidth
+            hspace.layoutParams.width = innerPaneView.intendedWidth
         }
 
         with(vspace) {
-            minimumHeight = innerPaneView.intendedHeight
+            vspace.minimumHeight = innerPaneView.intendedHeight
             vspace.layoutParams.height = innerPaneView.intendedHeight
         }
     }

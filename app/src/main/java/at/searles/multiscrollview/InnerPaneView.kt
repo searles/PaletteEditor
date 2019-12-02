@@ -31,27 +31,41 @@ class InnerPaneView(context: Context, attrs: AttributeSet): View(context, attrs)
             invalidate()
         }
 
-    fun onScrollTo(e: MotionEvent): Boolean {
-        return innerPane?.onScrollTo(e, visibleX0, visibleY0, width, height) ?: false
+    lateinit var listener: OnIntendedSizeChangedObserver
+
+    fun notifyIntendedSizeChanged() {
+        listener.intendedSizeChanged()
+    }
+
+    fun onScrollTo(e: MotionEvent): ScrollDirection {
+        return innerPane?.onScrollTo(e, visibleX0, visibleY0) ?: ScrollDirection.NoScroll
     }
 
     fun onTapUp(e: MotionEvent): Boolean {
-        return innerPane?.onTapUp(e, visibleX0, visibleY0, width, height) ?: false
+        return innerPane?.onTapUp(e, visibleX0, visibleY0) ?: false
     }
 
     fun onClick(e: MotionEvent): Boolean {
-        return innerPane?.onClick(e, visibleX0, visibleY0, width, height) ?: false
+        return innerPane?.onClick(e, visibleX0, visibleY0) ?: false
     }
 
     fun onDoubleClick(e: MotionEvent): Boolean {
-        return innerPane?.onDoubleClick(e, visibleX0, visibleY0, width, height) ?: false
+        return innerPane?.onDoubleClick(e, visibleX0, visibleY0) ?: false
+    }
+
+    fun onTapDown(e: MotionEvent): Boolean {
+        return innerPane?.onTapDown(e, visibleX0, visibleY0) ?: false
     }
 
     fun onLongPress(e: MotionEvent) {
-        innerPane?.onLongPress(e, visibleX0, visibleY0, width, height)
+        innerPane?.onLongPress(e, visibleX0, visibleY0)
     }
 
     override fun onDraw(canvas: Canvas) {
         innerPane?.onDraw(canvas, visibleX0, visibleY0, width, height)
+    }
+
+    interface OnIntendedSizeChangedObserver {
+        fun intendedSizeChanged()
     }
 }

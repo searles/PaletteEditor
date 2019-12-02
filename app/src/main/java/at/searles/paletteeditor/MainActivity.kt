@@ -4,6 +4,7 @@ import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.RecyclerView
+import at.searles.multiscrollview.CompositionCrossPane
 import at.searles.multiscrollview.InnerPaneView
 
 class MainActivity : AppCompatActivity() {
@@ -25,7 +26,7 @@ class MainActivity : AppCompatActivity() {
 
         colorsView.adapter = ColorsAdapter()
 
-        val scale = 5
+        val scale = 1
 
         val palettePane = PaletteEditorPane(innerPaneView)
 
@@ -34,7 +35,13 @@ class MainActivity : AppCompatActivity() {
         val hControlPane = HorizontalControlPane(innerPaneView, palettePane)
         val vControlPane = VerticalControlPane(innerPaneView, palettePane)
 
-        innerPaneView.innerPane = CompositionPane(vOffsetPane, hOffsetPane, vControlPane, hControlPane, palettePane)
+        innerPaneView.innerPane = CompositionCrossPane(
+            vOffsetPane,
+            hOffsetPane,
+            vControlPane,
+            hControlPane,
+            palettePane
+        )
 
         model = PaletteEditorModel().apply {
             columnCount = 10 * scale

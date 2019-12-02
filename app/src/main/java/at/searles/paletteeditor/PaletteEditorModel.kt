@@ -5,22 +5,20 @@ import android.util.SparseArray
 import androidx.core.util.containsKey
 import at.searles.paletteeditor.colors.Lab
 import at.searles.paletteeditor.colors.Rgb
-import kotlin.math.exp
-import kotlin.math.ln
-import kotlin.math.sqrt
+import kotlin.math.*
 
 class PaletteEditorModel {
     private val listeners = ArrayList<Listener>()
 
     var columnCount: Int = 1
         set(value) {
-            field = value
+            field = max(1, value)
             updateInterpolatedColors()
             listeners.forEach { it.onPaletteSizeChanged(this) }
         }
     var rowCount: Int = 1
         set(value) {
-            field = value
+            field = max(1, value)
             updateInterpolatedColors()
             listeners.forEach { it.onPaletteSizeChanged(this) }
         }
@@ -29,13 +27,13 @@ class PaletteEditorModel {
 
     var offsetX: Float = 0f
         set(value) {
-            field = value
+            field = max(0f, min(value, 1f))
             listeners.forEach { it.onOffsetChanged(this) }
         }
 
     var offsetY: Float = 0f
         set(value) {
-            field = value
+            field = max(0f, min(value, 1f))
             listeners.forEach { it.onOffsetChanged(this) }
         }
 
@@ -69,10 +67,16 @@ class PaletteEditorModel {
 
         for(rowIndex in 0 until colorPoints.size()) {
             val y = colorPoints.keyAt(rowIndex)
+
+            if(y >= rowCount) continue
+
             val rowValues = colorPoints.valueAt(rowIndex)
 
             for(colIndex in 0 until rowValues.size()) {
                 val x = rowValues.keyAt(colIndex)
+
+                if(x >= columnCount) continue
+
                 val lab = rowValues.valueAt(colIndex)
 
                 val weight = getWeight(x, y, col, row)
