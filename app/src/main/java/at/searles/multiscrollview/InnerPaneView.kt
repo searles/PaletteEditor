@@ -13,29 +13,23 @@ class InnerPaneView(context: Context, attrs: AttributeSet): View(context, attrs)
             requestLayout()
         }
 
-    val intendedWidth: Int
-        get() = innerPane?.width ?: 0
+    val intendedWidth: Float
+        get() = innerPane?.width ?: 0f
 
-    val intendedHeight: Int
-        get() = innerPane?.height ?: 0
+    val intendedHeight: Float
+        get() = innerPane?.height ?: 0f
 
-    var visibleX0: Int = 0
+    var visibleX0: Float = 0f
         set(value) {
             field = value
             invalidate()
         }
 
-    var visibleY0: Int = 0
+    var visibleY0: Float = 0f
         set(value) {
             field = value
             invalidate()
         }
-
-    lateinit var listener: OnIntendedSizeChangedObserver
-
-    fun notifyIntendedSizeChanged() {
-        listener.intendedSizeChanged()
-    }
 
     fun onScrollTo(e: MotionEvent): ScrollDirection {
         return innerPane?.onScrollTo(e, visibleX0, visibleY0) ?: ScrollDirection.NoScroll
@@ -62,10 +56,6 @@ class InnerPaneView(context: Context, attrs: AttributeSet): View(context, attrs)
     }
 
     override fun onDraw(canvas: Canvas) {
-        innerPane?.onDraw(canvas, visibleX0, visibleY0, width, height)
-    }
-
-    interface OnIntendedSizeChangedObserver {
-        fun intendedSizeChanged()
+        innerPane?.onDraw(canvas, visibleX0, visibleY0, width.toFloat(), height.toFloat())
     }
 }

@@ -10,28 +10,28 @@ import android.view.MotionEvent
  *      bottom
  */
 class CompositionCrossPane(private val leftPane: InnerPane, private val topPane: InnerPane, private val rightPane: InnerPane, private val bottomPane: InnerPane, private val centerPane: InnerPane): InnerPane {
-    override val width: Int
+    override val width: Float
         get() = leftPane.width + centerPane.width + rightPane.width
-    override val height: Int
+    override val height: Float
         get() = topPane.height + centerPane.height + bottomPane.height
 
     private val order = listOf(
-        Triple(leftPane, { visibleX0: Int -> visibleX0 }, { visibleY0: Int -> visibleY0 - topPane.height }),
-        Triple(topPane, { visibleX0: Int -> visibleX0 - leftPane.width }, { visibleY0: Int -> visibleY0 }),
-        Triple(rightPane, { visibleX0: Int -> visibleX0 - leftPane.width - centerPane.width }, { visibleY0: Int -> visibleY0 - topPane.height }),
-        Triple(bottomPane, { visibleX0: Int -> visibleX0 - leftPane.width }, { visibleY0: Int -> visibleY0 - topPane.height - centerPane.height }),
-        Triple(centerPane, { visibleX0: Int -> visibleX0 - leftPane.width }, { visibleY0: Int -> visibleY0 - topPane.height })
+        Triple(leftPane, { visibleX0: Float -> visibleX0 }, { visibleY0: Float -> visibleY0 - topPane.height }),
+        Triple(topPane, { visibleX0: Float -> visibleX0 - leftPane.width }, { visibleY0: Float -> visibleY0 }),
+        Triple(rightPane, { visibleX0: Float -> visibleX0 - leftPane.width - centerPane.width }, { visibleY0: Float -> visibleY0 - topPane.height }),
+        Triple(bottomPane, { visibleX0: Float -> visibleX0 - leftPane.width }, { visibleY0: Float -> visibleY0 - topPane.height - centerPane.height }),
+        Triple(centerPane, { visibleX0: Float -> visibleX0 - leftPane.width }, { visibleY0: Float -> visibleY0 - topPane.height })
     )
 
-    override fun onClick(e: MotionEvent, visibleX0: Int, visibleY0: Int): Boolean {
+    override fun onClick(e: MotionEvent, visibleX0: Float, visibleY0: Float): Boolean {
         return order.asSequence().map { it.first.onClick(e, it.second.invoke(visibleX0), it.third.invoke(visibleY0)) }.firstOrNull { it } ?: false
     }
 
-    override fun onTapDown(e: MotionEvent, visibleX0: Int, visibleY0: Int): Boolean {
+    override fun onTapDown(e: MotionEvent, visibleX0: Float, visibleY0: Float): Boolean {
         return order.asSequence().map { it.first.onTapDown(e, it.second.invoke(visibleX0), it.third.invoke(visibleY0)) }.firstOrNull { it } ?: false
     }
 
-    override fun onScrollTo(e: MotionEvent, visibleX0: Int, visibleY0: Int): ScrollDirection {
+    override fun onScrollTo(e: MotionEvent, visibleX0: Float, visibleY0: Float): ScrollDirection {
         return order.asSequence().map {
             it.first.onScrollTo(e, it.second.invoke(visibleX0), it.third.invoke(visibleY0))
         }.firstOrNull {
@@ -39,21 +39,25 @@ class CompositionCrossPane(private val leftPane: InnerPane, private val topPane:
         } ?: ScrollDirection.NoScroll
     }
 
-    override fun onLongPress(e: MotionEvent, visibleX0: Int, visibleY0: Int): Boolean {
+    override fun onLongPress(e: MotionEvent, visibleX0: Float, visibleY0: Float): Boolean {
         return order.asSequence().map { it.first.onLongPress(e, it.second.invoke(visibleX0), it.third.invoke(visibleY0)) }.firstOrNull { it } ?: false
     }
 
-    override fun onTapUp(e: MotionEvent, visibleX0: Int, visibleY0: Int): Boolean {
+    override fun onTapUp(e: MotionEvent, visibleX0: Float, visibleY0: Float): Boolean {
         return order.asSequence().map { it.first.onTapUp(e, it.second.invoke(visibleX0), it.third.invoke(visibleY0)) }.firstOrNull { it } ?: false
     }
 
-    override fun onDoubleClick(e: MotionEvent, visibleX0: Int, visibleY0: Int): Boolean {
+    override fun onDoubleClick(e: MotionEvent, visibleX0: Float, visibleY0: Float): Boolean {
         return order.asSequence().map { it.first.onDoubleClick(e, it.second.invoke(visibleX0), it.third.invoke(visibleY0)) }.firstOrNull { it } ?: false
     }
 
-    override fun onDraw(canvas: Canvas, visibleX0: Int, visibleY0: Int, visibleWidth: Int, visibleHeight: Int) {
+    override fun onDraw(canvas: Canvas, visibleX0: Float, visibleY0: Float, visibleWidth: Float, visibleHeight: Float) {
         order.reversed().forEach {
             it.first.onDraw(canvas, it.second.invoke(visibleX0), it.third.invoke(visibleY0), visibleWidth, visibleHeight)
         }
+    }
+
+    override fun cancelCurrentAction() {
+        order.forEach { it.first.cancelCurrentAction() }
     }
 }

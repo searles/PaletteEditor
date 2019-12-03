@@ -1,18 +1,18 @@
 package at.searles.paletteeditor.colors
 
 import android.graphics.Color
-import at.searles.paletteeditor.HorizontalControlPane
+import kotlin.math.min
 
 /**
  * Colors can come in two flavors: as integers in AARRGGBB-Format, or
  * as float[4]-arrays in rgba-format or laba-format.
  */
 object Colors {
-    fun brightness(argb: Int): Double {
-        val r = argb and 0x00ff0000 shr 16
-        val g = argb and 0x0000ff00 shr 8
-        val b = argb and 0x000000ff
-        return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
+    fun brightness(rgb: Int): Float {
+        val r = rgb and 0x00ff0000 shr 16
+        val g = rgb and 0x0000ff00 shr 8
+        val b = rgb and 0x000000ff
+        return (0.2126f * r + 0.7152f * g + 0.0722f * b) / 255f
     }
 
     fun toColorString(color: Int): String {
@@ -64,5 +64,10 @@ object Colors {
 
     fun transparent(alpha: Float, color: Int): Int {
         return Color.argb((Color.alpha(color) * alpha).toInt(), Color.red(color), Color.green(color), Color.blue(color))
+    }
+
+    fun toGray(color: Int): Int {
+        val brightness = min(255, (brightness(color) * 256f).toInt())
+        return Color.argb(Color.alpha(color), brightness, brightness, brightness)
     }
 }

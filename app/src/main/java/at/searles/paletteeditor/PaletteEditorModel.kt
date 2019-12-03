@@ -12,15 +12,17 @@ class PaletteEditorModel {
 
     var columnCount: Int = 1
         set(value) {
-            field = max(1, value)
+            require(value >= 1)
+            field = value
             updateInterpolatedColors()
-            listeners.forEach { it.onPaletteSizeChanged(this) }
+            listeners.forEach { it.onPaletteSizeChanged() }
         }
     var rowCount: Int = 1
         set(value) {
-            field = max(1, value)
+            require(value >= 1)
+            field = value
             updateInterpolatedColors()
-            listeners.forEach { it.onPaletteSizeChanged(this) }
+            listeners.forEach { it.onPaletteSizeChanged() }
         }
 
     private val colorPoints = SparseArray<SparseArray<Lab>>() // [row][col]
@@ -28,20 +30,32 @@ class PaletteEditorModel {
     var offsetX: Float = 0f
         set(value) {
             field = max(0f, min(value, 1f))
-            listeners.forEach { it.onOffsetChanged(this) }
+            listeners.forEach { it.onOffsetChanged() }
         }
 
     var offsetY: Float = 0f
         set(value) {
             field = max(0f, min(value, 1f))
-            listeners.forEach { it.onOffsetChanged(this) }
+            listeners.forEach { it.onOffsetChanged() }
         }
+
+    var selectedRow: Int = -1
+        private set
+    var selectedCol: Int = -1
+        private set
 
     private val colorList = ArrayList<Int>()
 
     fun colorAt(col: Int, row: Int): Int {
         require(col < columnCount && row < rowCount) {"out of bounds"}
         return colorList[row * columnCount + col]
+    }
+
+    fun setSelection(col: Int, row: Int) {
+        selectedCol = col
+        selectedRow = row
+
+        listeners.forEach { it.onSelectionChanged() }
     }
 
     private fun updateInterpolatedColors() {
@@ -123,6 +137,8 @@ class PaletteEditorModel {
     }
 
     fun setColorPoint(col: Int, row: Int, rgb: Int) {
+        require(col >= 0 && row >= 0)
+
         val argb = if((rgb and alphaMask) == 0) alphaMask or rgb else rgb
 
         var rowValues = colorPoints.get(row)
@@ -134,32 +150,15 @@ class PaletteEditorModel {
 
         rowValues.put(col, Rgb.of(argb).toLab())
         updateInterpolatedColors()
+        listeners.forEach { it.onColorsChanged() }
     }
 
     fun removeColorPoint(col: Int, row: Int) {
         if(isColorPoint(col, row)) {
             colorPoints.get(row).remove(col)
             updateInterpolatedColors()
+            listeners.forEach { it.onColorsChanged() }
         }
-    }
-
-    fun addRow() {
-        rowCount++
-    }
-
-    fun removeRow() {
-        require(rowCount > 1)
-
-        rowCount--
-    }
-
-    fun addColumn() {
-        columnCount++
-    }
-
-    fun removeColumn() {
-        require(columnCount > 1)
-        columnCount--
     }
 
     fun removeListener(listener: Listener) {
@@ -171,8 +170,10 @@ class PaletteEditorModel {
     }
 
     interface Listener {
-        fun onPaletteSizeChanged(paletteEditorModel: PaletteEditorModel)
-        fun onOffsetChanged(paletteEditorModel: PaletteEditorModel)
+        fun onPaletteSizeChanged()
+        fun onOffsetChanged()
+        fun onColorsChanged()
+        fun onSelectionChanged()
     }
 
     companion object {

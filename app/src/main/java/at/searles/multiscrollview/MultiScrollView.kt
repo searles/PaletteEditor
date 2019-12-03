@@ -60,12 +60,6 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
         hscroll.viewTreeObserver.addOnScrollChangedListener { updateViewCoordinates() }
         vscroll.viewTreeObserver.addOnScrollChangedListener { updateViewCoordinates() }
 
-        innerPaneView.listener = object: InnerPaneView.OnIntendedSizeChangedObserver {
-            override fun intendedSizeChanged() {
-                updateSize()
-            }
-        }
-
         post {
             updateSize()
             updateViewCoordinates()
@@ -154,20 +148,17 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
     }
 
     private fun updateViewCoordinates() {
-        innerPaneView.visibleX0 = hscroll.scrollX
-        innerPaneView.visibleY0 = vscroll.scrollY
+        innerPaneView.visibleX0 = hscroll.scrollX.toFloat()
+        innerPaneView.visibleY0 = vscroll.scrollY.toFloat()
     }
 
-    private fun updateSize() {
-        with(hspace) {
-            hspace.minimumWidth = innerPaneView.intendedWidth
-            hspace.layoutParams.width = innerPaneView.intendedWidth
-        }
+    fun updateSize() {
+        // FIXME scroll a bit to indicate that the number of rows/columns has changed.
+        hspace.minimumWidth = innerPaneView.intendedWidth.toInt()
+        hspace.layoutParams.width = innerPaneView.intendedWidth.toInt()
 
-        with(vspace) {
-            vspace.minimumHeight = innerPaneView.intendedHeight
-            vspace.layoutParams.height = innerPaneView.intendedHeight
-        }
+        vspace.minimumHeight = innerPaneView.intendedHeight.toInt()
+        vspace.layoutParams.height = innerPaneView.intendedHeight.toInt()
     }
 
     private inner class BorderScrollUpdateTask: TimerTask() {
