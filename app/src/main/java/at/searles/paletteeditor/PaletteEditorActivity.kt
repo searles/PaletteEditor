@@ -7,9 +7,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import at.searles.multiscrollview.CompositionCrossPane
 import at.searles.multiscrollview.InnerPaneView
+import at.searles.multiscrollview.MultiScrollView
 import at.searles.paletteeditor.colorsview.ColorsAdapter
 import at.searles.paletteeditor.paletteeditorview.*
-import kotlinx.android.synthetic.main.activity_main.*
 
 class PaletteEditorActivity : AppCompatActivity() {
 
@@ -17,8 +17,12 @@ class PaletteEditorActivity : AppCompatActivity() {
         findViewById<RecyclerView>(R.id.colorsView)
     }
 
+    private val multiScrollView by lazy {
+        findViewById<MultiScrollView>(R.id.multiScrollView)
+    }
+
     private val innerPaneView by lazy {
-        findViewById<InnerPaneView>(R.id.innerPaneView)
+        multiScrollView.findViewById<InnerPaneView>(R.id.innerPaneView)
     }
 
     private lateinit var model: PaletteEditorModel
@@ -37,14 +41,14 @@ class PaletteEditorActivity : AppCompatActivity() {
     }
 
     private fun initializeController() {
-        controller = PaletteEditorController(model)
+        controller = PaletteEditorController(model, innerPaneView)
     }
 
     private fun initializeColorsView() {
         colorsView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         colorsView.adapter = ColorsAdapter(
             this
-        ).apply { listener = controller }
+        )
     }
 
     private fun initializePaletteModel() {
@@ -89,9 +93,9 @@ class PaletteEditorActivity : AppCompatActivity() {
 
         val vOffsetPane = VerticalOffsetPane(innerPaneView, palettePane).apply { listener = controller }
 
-        val hControlPane = HorizontalControlPane(innerPaneView, palettePane).apply { listener = controller }
+        val hControlPane = HorizontalEditTablePane(innerPaneView, palettePane).apply { listener = controller }
 
-        val vControlPane = VerticalControlPane(innerPaneView, palettePane).apply { listener = controller }
+        val vControlPane = VerticalEditTablePane(innerPaneView, palettePane).apply { listener = controller }
 
         innerPaneView.innerPane = CompositionCrossPane(vOffsetPane, hOffsetPane, vControlPane, hControlPane, palettePane)
     }

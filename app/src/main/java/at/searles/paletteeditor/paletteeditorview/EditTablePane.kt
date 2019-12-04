@@ -3,13 +3,17 @@ package at.searles.paletteeditor.paletteeditorview
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.drawable.Drawable
+import android.view.DragEvent
 import android.view.MotionEvent
 import at.searles.multiscrollview.InnerPane
 import at.searles.multiscrollview.InnerPaneView
 import at.searles.multiscrollview.ScrollDirection
+import at.searles.paletteeditor.R
+import at.searles.paletteeditor.colors.Colors
 import kotlin.math.hypot
 
-abstract class ControlPane(private val rootView: InnerPaneView, private val paletteEditorPane: PaletteEditorPane): InnerPane {
+abstract class EditTablePane(private val rootView: InnerPaneView, private val paletteEditorPane: PaletteEditorPane): InnerPane {
     val iconSize
         get() = paletteEditorPane.iconSize
 
@@ -63,8 +67,44 @@ abstract class ControlPane(private val rootView: InnerPaneView, private val pale
         return false
     }
 
-    override fun cancelCurrentAction() {
-        // Nothing to do.
+    override fun dragStarted(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        return false
+    }
+
+    override fun dragEntered(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        return false
+    }
+
+    override fun dragExited(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        return false
+    }
+
+    override fun dragLocation(e: DragEvent, visibleX0: Float, visibleY0: Float): ScrollDirection? {
+        return null
+    }
+
+    override fun dragEnded(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        return false
+    }
+
+    override fun drop(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        return false
+    }
+
+    fun drawPlus(canvas: Canvas, x: Float, y: Float) {
+        // TODO Change colors!
+
+        val d: Drawable = rootView.resources.getDrawable(R.drawable.ic_add_circle_outline_black_24dp, null)
+        d.setBounds((x - iconSize / 2f).toInt(),
+            (y - iconSize / 2f).toInt(), (x + iconSize / 2f).toInt(), (y + iconSize / 2f).toInt())
+        d.draw(canvas)
+    }
+
+    fun drawMinus(canvas: Canvas, x: Float, y: Float) {
+        val d: Drawable = rootView.resources.getDrawable(R.drawable.ic_remove_circle_outline_black_24dp, null)
+        d.setBounds((x - iconSize / 2f).toInt(),
+            (y - iconSize / 2f).toInt(), (x + iconSize / 2f).toInt(), (y + iconSize / 2f).toInt())
+        d.draw(canvas)
     }
 
     abstract fun centerPlusX(visibleX0: Float): Float
@@ -76,9 +116,16 @@ abstract class ControlPane(private val rootView: InnerPaneView, private val pale
     fun drawColorRange(canvas: Canvas, cols: IntRange, rows: IntRange, visibleX0: Float, visibleY0: Float) {
         for(row in rows) {
             for(col in cols) {
-                // FIXME transparency
-                paletteEditorPane.drawColor(canvas, col, row, visibleX0, visibleY0)
+                val x0 = paletteEditorPane.x0At(col, visibleX0)
+                val y0 = paletteEditorPane.y0At(row, visibleY0)
+
+                val color = Colors.transparent(transparency, model.colorAt(col, row))
+                paletteEditorPane.drawColorAt(canvas, x0, y0, color)
             }
         }
+    }
+
+    companion object {
+        val transparency = 0.26f
     }
 }

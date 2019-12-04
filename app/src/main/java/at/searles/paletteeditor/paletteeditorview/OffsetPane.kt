@@ -2,6 +2,7 @@ package at.searles.paletteeditor.paletteeditorview
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.view.DragEvent
 import android.view.MotionEvent
 import at.searles.multiscrollview.InnerPane
 import at.searles.multiscrollview.InnerPaneView
@@ -45,13 +46,6 @@ abstract class OffsetPane(private val rootView: InnerPaneView, private val palet
 
     override fun onClick(e: MotionEvent, visibleX0: Float, visibleY0: Float): Boolean {
         return false
-    }
-
-    override fun cancelCurrentAction() {
-        if(isDragging) {
-            isDragging = false
-            rootView.invalidate()
-        }
     }
 
     override fun onTapDown(e: MotionEvent, visibleX0: Float, visibleY0: Float): Boolean {
@@ -110,6 +104,31 @@ abstract class OffsetPane(private val rootView: InnerPaneView, private val palet
         sliderIconPaint.color = if(isDragging) activeColor else passiveColor
         canvas.drawCircle(sliderIconX(visibleX0), sliderIconY(visibleY0), sliderIconSize / 8f, sliderIconPaint)
     }
+
+    override fun dragStarted(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        return false
+    }
+
+    override fun dragEntered(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        return false
+    }
+
+    override fun dragExited(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        return false
+    }
+
+    override fun dragLocation(e: DragEvent, visibleX0: Float, visibleY0: Float): ScrollDirection? {
+        return null
+    }
+
+    override fun dragEnded(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        return false
+    }
+
+    override fun drop(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        return false
+    }
+
 
     companion object {
         const val transparentAlpha = 0.26f

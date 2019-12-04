@@ -1,9 +1,11 @@
 package at.searles.paletteeditor.paletteeditorview
 
 import android.graphics.Canvas
+import android.graphics.drawable.Drawable
 import at.searles.multiscrollview.InnerPaneView
+import at.searles.paletteeditor.R
 
-class HorizontalControlPane(rootView: InnerPaneView, private val paletteEditorPane: PaletteEditorPane): ControlPane(rootView, paletteEditorPane) {
+class HorizontalEditTablePane(private val rootView: InnerPaneView, private val paletteEditorPane: PaletteEditorPane): EditTablePane(rootView, paletteEditorPane) {
     override val width: Float
         get() = paletteEditorPane.width - paletteEditorPane.spacing
     override val height: Float
@@ -28,10 +30,10 @@ class HorizontalControlPane(rootView: InnerPaneView, private val paletteEditorPa
     override fun onDraw(canvas: Canvas, visibleX0: Float, visibleY0: Float, visibleWidth: Float, visibleHeight: Float) {
         drawColorRange(canvas, 0 until (model.columnCount - 1), 0 .. 0, visibleX0, visibleY0)
 
-        canvas.drawCircle(centerPlusX(visibleX0), centerPlusY(visibleY0), iconSize / 2f, buttonPaint)
+        drawPlus(canvas, centerPlusX(visibleX0), centerPlusY(visibleY0))
 
         if(model.columnCount > 1) {
-            canvas.drawCircle(centerMinusX(visibleX0), centerMinusY(visibleY0), iconSize / 2f, buttonPaint)
+            drawMinus(canvas, centerMinusX(visibleX0), centerMinusY(visibleY0))
         }
     }
 

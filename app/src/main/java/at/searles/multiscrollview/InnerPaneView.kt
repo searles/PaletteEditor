@@ -3,10 +3,19 @@ package at.searles.multiscrollview
 import android.content.Context
 import android.graphics.Canvas
 import android.util.AttributeSet
+import android.view.DragEvent
 import android.view.MotionEvent
 import android.view.View
+import android.widget.AbsoluteLayout
+import android.widget.LinearLayout
+import android.widget.RelativeLayout
 
-class InnerPaneView(context: Context, attrs: AttributeSet): View(context, attrs) {
+class InnerPaneView(context: Context, attrs: AttributeSet): RelativeLayout(context, attrs) {
+
+    init {
+        setWillNotDraw(false)
+    }
+
     var innerPane: InnerPane? = null
         set(value) {
             field = value
@@ -57,5 +66,29 @@ class InnerPaneView(context: Context, attrs: AttributeSet): View(context, attrs)
 
     override fun onDraw(canvas: Canvas) {
         innerPane?.onDraw(canvas, visibleX0, visibleY0, width.toFloat(), height.toFloat())
+    }
+
+    fun dragStarted(e: DragEvent): Boolean {
+        return innerPane?.dragStarted(e, visibleX0, visibleY0) ?: false
+    }
+
+    fun dragEntered(e: DragEvent): Boolean {
+        return innerPane?.dragEntered(e, visibleX0, visibleY0) ?: false
+    }
+
+    fun dragExited(e: DragEvent): Boolean {
+        return innerPane?.dragExited(e, visibleX0, visibleY0) ?: false
+    }
+
+    fun dragLocation(e: DragEvent): ScrollDirection? {
+        return innerPane?.dragLocation(e, visibleX0, visibleY0)
+    }
+
+    fun dragEnded(e: DragEvent): Boolean {
+        return innerPane?.dragEnded(e, visibleX0, visibleY0) ?: false
+    }
+
+    fun drop(e: DragEvent): Boolean {
+        return innerPane?.drop(e, visibleX0, visibleY0) ?: false
     }
 }

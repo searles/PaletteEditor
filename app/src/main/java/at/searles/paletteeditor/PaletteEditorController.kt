@@ -1,44 +1,35 @@
 package at.searles.paletteeditor
 
-import android.util.Log
-import at.searles.paletteeditor.colorsview.ColorsAdapter
+import at.searles.multiscrollview.InnerPaneView
 import at.searles.paletteeditor.paletteeditorview.*
 
-class PaletteEditorController(private val model: PaletteEditorModel): PaletteEditorPane.Listener, VerticalOffsetPane.Listener, HorizontalOffsetPane.Listener, VerticalControlPane.Listener, HorizontalControlPane.Listener, ColorsAdapter.Listener {
+
+class PaletteEditorController(private val model: PaletteEditorModel, private val innerPaneView: InnerPaneView): PaletteEditorPane.Listener, VerticalOffsetPane.Listener, HorizontalOffsetPane.Listener, VerticalEditTablePane.Listener, HorizontalEditTablePane.Listener {
     private fun inRange(col: Int, row: Int): Boolean {
         return 0 <= col && col < model.columnCount && 0 <= row && row < model.rowCount
     }
 
-    override fun onColorClicked(col: Int, row: Int) {
+    override fun editColorPointAt(col: Int, row: Int) {
         require(inRange(col, row))
+        // TODO Open edit-color dialog.
+    }
+
+    override fun removeColorPointAt(col: Int, row: Int) {
+        require(inRange(col, row))
+
+        model.removeColorPoint(col, row)
+    }
+
+    override fun addColorPointAt(col: Int, row: Int, color: Int) {
+        model.setColorPoint(col, row, color)
+    }
+
+    override fun activateColorAt(col: Int, row: Int) {
         model.setSelection(col, row)
     }
 
-    override fun onColorDoubleClicked(col: Int, row: Int) {
-        require(inRange(col, row))
-        // FIXME What to do in this case?
-    }
-
-    override fun onColorDraggedTo(fromCol: Int, fromRow: Int, toCol: Int, toRow: Int) {
-        require(inRange(fromCol, fromRow))
-
-        model.setSelection(toCol, toRow)
-
-        if(fromCol == toCol && fromRow == toRow) {
-            return
-        }
-
-        if(inRange(toCol, toRow)) {
-            model.setColorPoint(toCol, toRow, model.colorAt(fromCol, fromRow))
-        }
-
-        if(model.isColorPoint(fromCol, fromRow)) {
-            model.removeColorPoint(fromCol, fromRow)
-        }
-    }
-
-    override fun onColorActivated(toCol: Int, toRow: Int) {
-        model.setSelection(toCol, toRow)
+    override fun deactivateColor() {
+        model.setSelection(-1, -1)
     }
 
     override fun onVerticalOffsetChanged(offset: Float) {
@@ -66,14 +57,6 @@ class PaletteEditorController(private val model: PaletteEditorModel): PaletteEdi
     override fun removeColumn() {
         if(model.columnCount > 1) {
             model.columnCount--
-        }
-    }
-
-    override fun onColorPicked(color: Int) {
-        if(inRange(model.selectedCol, model.selectedRow)) {
-            model.setColorPoint(model.selectedCol, model.selectedRow, color)
-        } else {
-            Log.i(javaClass.simpleName, "Could not set color because selection is out of range: ${model.selectedCol} x ${model.selectedRow}")
         }
     }
 }

@@ -3,6 +3,7 @@ package at.searles.multiscrollview
 import android.content.Context
 import android.graphics.Canvas
 import android.util.AttributeSet
+import android.view.DragEvent
 import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.MotionEvent
@@ -77,12 +78,41 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
         innerPaneView.draw(canvas)
     }
 
+    private fun initiateBorderScrollIfNecessary(x: Float, y: Float, scrollDirection: ScrollDirection?) {
+        if(scrollDirection != null && scrollDirection != ScrollDirection.NoScroll) {
+            if(!isBorderScrolling(x, y, scrollDirection)) {
+                cancelBorderScrolling()
+            }
+        }
+    }
+
+    override fun dispatchDragEvent(e: DragEvent): Boolean {
+        return when(e.action) {
+            DragEvent.ACTION_DRAG_STARTED -> { innerPaneView.dragStarted(e) }
+            DragEvent.ACTION_DRAG_ENTERED -> { innerPaneView.dragEntered(e) }
+            DragEvent.ACTION_DRAG_EXITED -> { innerPaneView.dragExited(e) }
+            DragEvent.ACTION_DRAG_LOCATION -> {
+                val scrollDirection = innerPaneView.dragLocation(e)
+                initiateBorderScrollIfNecessary(e.x, e.y, scrollDirection)
+                return scrollDirection != null
+            }
+            DragEvent.ACTION_DRAG_ENDED -> {
+                cancelBorderScrolling()
+                innerPaneView.dragEnded(e)
+            }
+            DragEvent.ACTION_DROP -> { innerPaneView.drop(e) }
+            else -> error("unknown action")
+        }
+    }
+
+
+
     override fun dispatchTouchEvent(e: MotionEvent): Boolean {
         if (e.action == MotionEvent.ACTION_MOVE) {
             val scrollDirection = innerPaneView.onScrollTo(e)
 
             if(scrollDirection != ScrollDirection.NoScroll) {
-                if(isBorderScrolling(e, scrollDirection)) {
+                if(isBorderScrolling(e.x, e.y, scrollDirection)) {
                     return true
                 } else {
                     cancelBorderScrolling()
@@ -105,19 +135,16 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
                 || (hscroll.dispatchTouchEvent(e) or vscroll.dispatchTouchEvent(e))
     }
 
-    private fun isBorderScrolling(
-        event: MotionEvent,
-        scrollDirection: ScrollDirection
-    ): Boolean {
+    private fun isBorderScrolling(x: Float, y: Float, scrollDirection: ScrollDirection): Boolean {
         val dx = when {
-            scrollDirection.isHorizontal && event.x < borderScrollMargin -> event.x - borderScrollMargin
-            scrollDirection.isHorizontal && event.x > width - borderScrollMargin -> event.x - width + borderScrollMargin
+            scrollDirection.isHorizontal && x < borderScrollMargin -> x - borderScrollMargin
+            scrollDirection.isHorizontal && x > width - borderScrollMargin -> x - width + borderScrollMargin
             else -> 0f
         }
 
         val dy = when {
-            scrollDirection.isVertical && event.y < borderScrollMargin -> event.y - borderScrollMargin
-            scrollDirection.isVertical && event.y > height - borderScrollMargin -> event.y - height + borderScrollMargin
+            scrollDirection.isVertical && y < borderScrollMargin -> y - borderScrollMargin
+            scrollDirection.isVertical && y > height - borderScrollMargin -> y - height + borderScrollMargin
             else -> 0f
         }
 

@@ -1,6 +1,7 @@
 package at.searles.multiscrollview
 
 import android.graphics.Canvas
+import android.view.DragEvent
 import android.view.MotionEvent
 
 /**
@@ -57,7 +58,27 @@ class CompositionCrossPane(private val leftPane: InnerPane, private val topPane:
         }
     }
 
-    override fun cancelCurrentAction() {
-        order.forEach { it.first.cancelCurrentAction() }
+    override fun dragStarted(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        return order.asSequence().map { it.first.dragStarted(e, it.second.invoke(visibleX0), it.third.invoke(visibleY0)) }.firstOrNull { it } ?: false
+    }
+
+    override fun dragEntered(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        return order.asSequence().map { it.first.dragEntered(e, it.second.invoke(visibleX0), it.third.invoke(visibleY0)) }.firstOrNull { it } ?: false
+    }
+
+    override fun dragExited(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        return order.asSequence().map { it.first.dragExited(e, it.second.invoke(visibleX0), it.third.invoke(visibleY0)) }.firstOrNull { it } ?: false
+    }
+
+    override fun dragLocation(e: DragEvent, visibleX0: Float, visibleY0: Float): ScrollDirection? {
+        return order.asSequence().map { it.first.dragLocation(e, it.second.invoke(visibleX0), it.third.invoke(visibleY0)) }.firstOrNull { it != null }
+    }
+
+    override fun dragEnded(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        return order.asSequence().map { it.first.dragEnded(e, it.second.invoke(visibleX0), it.third.invoke(visibleY0)) }.firstOrNull { it } ?: false
+    }
+
+    override fun drop(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        return order.asSequence().map { it.first.drop(e, it.second.invoke(visibleX0), it.third.invoke(visibleY0)) }.firstOrNull { it } ?: false
     }
 }

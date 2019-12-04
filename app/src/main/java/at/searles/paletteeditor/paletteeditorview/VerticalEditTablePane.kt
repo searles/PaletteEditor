@@ -5,7 +5,7 @@ import at.searles.multiscrollview.InnerPaneView
 
 // Name: Viewport.
 
-class VerticalControlPane(rootView: InnerPaneView, private val paletteEditorPane: PaletteEditorPane): ControlPane(rootView, paletteEditorPane) {
+class VerticalEditTablePane(rootView: InnerPaneView, private val paletteEditorPane: PaletteEditorPane): EditTablePane(rootView, paletteEditorPane) {
     override val width: Float
         get() = paletteEditorPane.iconSize
     override val height: Float
@@ -30,10 +30,10 @@ class VerticalControlPane(rootView: InnerPaneView, private val paletteEditorPane
     override fun onDraw(canvas: Canvas, visibleX0: Float, visibleY0: Float, visibleWidth: Float, visibleHeight: Float) {
         drawColorRange(canvas, 0 .. 0, 0 until (model.rowCount - 1), visibleX0, visibleY0)
 
-        canvas.drawCircle(centerPlusX(visibleX0), centerPlusY(visibleY0), iconSize / 2f, buttonPaint)
+        drawPlus(canvas, centerPlusX(visibleX0), centerPlusY(visibleY0))
 
         if(model.rowCount > 1) {
-            canvas.drawCircle(centerMinusX(visibleX0), centerMinusY(visibleY0), iconSize / 2f, buttonPaint)
+            drawMinus(canvas, centerMinusX(visibleX0), centerMinusY(visibleY0))
         }
     }
 

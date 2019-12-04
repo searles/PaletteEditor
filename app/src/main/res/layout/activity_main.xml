@@ -13,7 +13,9 @@
         app:layout_constraintBottom_toTopOf="@+id/colorsView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" >
+
+    </at.searles.multiscrollview.MultiScrollView>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/colorsView"
