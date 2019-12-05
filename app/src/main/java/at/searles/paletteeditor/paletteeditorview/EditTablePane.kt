@@ -91,17 +91,18 @@ abstract class EditTablePane(private val rootView: InnerPaneView, private val pa
         return false
     }
 
-    fun drawPlus(canvas: Canvas, x: Float, y: Float) {
-        // TODO Change colors!
+    abstract val plusDrawable: Int
+    abstract val minusDrawable: Int
 
-        val d: Drawable = rootView.resources.getDrawable(R.drawable.ic_add_circle_outline_black_24dp, null)
+    fun drawPlus(canvas: Canvas, x: Float, y: Float) {
+        val d: Drawable = rootView.resources.getDrawable(plusDrawable, null)
         d.setBounds((x - iconSize / 2f).toInt(),
             (y - iconSize / 2f).toInt(), (x + iconSize / 2f).toInt(), (y + iconSize / 2f).toInt())
         d.draw(canvas)
     }
 
     fun drawMinus(canvas: Canvas, x: Float, y: Float) {
-        val d: Drawable = rootView.resources.getDrawable(R.drawable.ic_remove_circle_outline_black_24dp, null)
+        val d: Drawable = rootView.resources.getDrawable(minusDrawable, null)
         d.setBounds((x - iconSize / 2f).toInt(),
             (y - iconSize / 2f).toInt(), (x + iconSize / 2f).toInt(), (y + iconSize / 2f).toInt())
         d.draw(canvas)

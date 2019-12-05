@@ -24,12 +24,28 @@ class PaletteEditorController(private val model: PaletteEditorModel, private val
         model.setColorPoint(col, row, color)
     }
 
-    override fun activateColorAt(col: Int, row: Int) {
+    override fun selectColorAt(col: Int, row: Int) {
         model.setSelection(col, row)
     }
 
-    override fun deactivateColor() {
+    override fun unselectColor() {
         model.setSelection(-1, -1)
+    }
+
+    override fun moveColorPoint(fromCol: Int, fromRow: Int, toCol: Int, toRow: Int) {
+        require(inRange(fromCol, fromRow) && inRange(toCol, toRow))
+
+        if(fromCol == toCol && fromRow == toRow) {
+            return
+        }
+
+        val color = model.colorAt(fromCol, fromRow)
+
+        if(model.isColorPoint(fromCol, fromRow)) {
+            model.removeColorPoint(fromCol, fromRow)
+        }
+
+        model.setColorPoint(toCol, toRow, color)
     }
 
     override fun onVerticalOffsetChanged(offset: Float) {

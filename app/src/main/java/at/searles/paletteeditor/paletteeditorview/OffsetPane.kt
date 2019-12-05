@@ -40,8 +40,6 @@ abstract class OffsetPane(private val rootView: InnerPaneView, private val palet
 
     private var isDragging = false
 
-    abstract fun isInside(x: Float, y: Float, visibleX0: Float, visibleY0: Float): Boolean
-
     abstract fun updateOffsetFromEvent(e: MotionEvent, visibleX0: Float, visibleY0: Float)
 
     override fun onClick(e: MotionEvent, visibleX0: Float, visibleY0: Float): Boolean {

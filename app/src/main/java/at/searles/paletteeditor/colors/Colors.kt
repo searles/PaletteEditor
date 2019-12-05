@@ -9,10 +9,11 @@ import kotlin.math.min
  */
 object Colors {
     fun brightness(rgb: Int): Float {
+
         val r = rgb and 0x00ff0000 shr 16
         val g = rgb and 0x0000ff00 shr 8
         val b = rgb and 0x000000ff
-        return (0.2126f * r + 0.7152f * g + 0.0722f * b) / 255f
+        return (0.299f * r + 0.587f * g + 0.114f * b) / 255f
     }
 
     fun toColorString(color: Int): String {

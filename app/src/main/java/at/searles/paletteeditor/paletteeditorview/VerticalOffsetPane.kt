@@ -13,11 +13,7 @@ class VerticalOffsetPane(rootView: InnerPaneView, private val paletteEditorPane:
 
     override val scrollDirection = ScrollDirection.Vertical
 
-    override fun isInside(x: Float, y: Float, visibleX0: Float, visibleY0: Float): Boolean {
-        return -visibleY0 <= y && y < -visibleY0 + height && 0 <= x && x < width
-    }
-
-    private fun offsetFromY(y: Float, visibleY0: Float) = (y + visibleY0 - sliderIconSize / 2f) / height
+    private fun offsetFromY(y: Float, visibleY0: Float) = (y + visibleY0 - sliderIconSize / 2f) / (height - sliderIconSize)
 
     lateinit var listener: Listener
 
@@ -26,7 +22,7 @@ class VerticalOffsetPane(rootView: InnerPaneView, private val paletteEditorPane:
     }
 
     override fun sliderIconX(visibleX0: Float) = width / 2f
-    override fun sliderIconY(visibleY0: Float) = model.offsetY * height - visibleY0 + sliderIconSize / 2f
+    override fun sliderIconY(visibleY0: Float) = model.offsetY * (height - sliderIconSize) - visibleY0 + sliderIconSize / 2f
 
     override fun drawRuler(canvas: Canvas, visibleX0: Float, visibleY0: Float) {
         sliderRulerPaint.color = activeColor

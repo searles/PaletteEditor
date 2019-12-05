@@ -2,6 +2,7 @@ package at.searles.paletteeditor.paletteeditorview
 
 import android.graphics.Canvas
 import at.searles.multiscrollview.InnerPaneView
+import at.searles.paletteeditor.R
 
 // Name: Viewport.
 
@@ -21,6 +22,9 @@ class VerticalEditTablePane(rootView: InnerPaneView, private val paletteEditorPa
         listener.removeRow()
     }
 
+    override val plusDrawable: Int = R.drawable.ic_add_circle_arrow_down_24dp
+    override val minusDrawable: Int = R.drawable.ic_minus_circle_arrow_right_24dp
+
     override fun centerPlusX(visibleX0: Float) = width / 2f - visibleX0
     override fun centerPlusY(visibleY0: Float) = 0f - visibleY0 - paletteEditorPane.iconSize / 2f
 
@@ -28,7 +32,9 @@ class VerticalEditTablePane(rootView: InnerPaneView, private val paletteEditorPa
     override fun centerMinusY(visibleY0: Float) = height - visibleY0 - paletteEditorPane.iconSize / 2f
 
     override fun onDraw(canvas: Canvas, visibleX0: Float, visibleY0: Float, visibleWidth: Float, visibleHeight: Float) {
-        drawColorRange(canvas, 0 .. 0, 0 until (model.rowCount - 1), visibleX0, visibleY0)
+        val colorRangeEnd = if(model.rowCount > 1) model.rowCount - 1 else 1
+
+        drawColorRange(canvas, 0 .. 0, 0 until colorRangeEnd, visibleX0, visibleY0)
 
         drawPlus(canvas, centerPlusX(visibleX0), centerPlusY(visibleY0))
 

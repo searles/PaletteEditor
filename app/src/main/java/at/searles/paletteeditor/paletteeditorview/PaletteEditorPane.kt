@@ -1,6 +1,5 @@
 package at.searles.paletteeditor.paletteeditorview
 
-import android.R.attr.*
 import android.content.ClipData
 import android.content.res.ColorStateList
 import android.graphics.Canvas
@@ -63,11 +62,6 @@ class PaletteEditorPane(private val rootView: InnerPaneView, val model: PaletteE
         return true
     }
 
-    private var isMovingColorAction = false
-
-    private var dragFromCol = 0
-    private var dragFromRow = 0
-
     private val draggableView = Button(rootView.context).also {
         it.layoutParams = RelativeLayout.LayoutParams(
             iconSize.toInt(),
@@ -82,6 +76,23 @@ class PaletteEditorPane(private val rootView: InnerPaneView, val model: PaletteE
     private fun isInRange(col: Int, row: Int): Boolean {
         return 0 <= col && col < model.columnCount && 0 <= row && row < model.rowCount
     }
+
+    override fun onTapDown(e: MotionEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        return false
+    }
+
+    override fun onScrollTo(e: MotionEvent, visibleX0: Float, visibleY0: Float): ScrollDirection? {
+        return null
+    }
+
+    override fun onTapUp(e: MotionEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        return false
+    }
+
+    private var isColorMoved = false
+
+    private var moveFromCol = 0
+    private var moveFromRow = 0
 
     override fun onLongPress(e: MotionEvent, visibleX0: Float, visibleY0: Float): Boolean {
         val col = columnAt(e.x, visibleX0)
@@ -99,103 +110,94 @@ class PaletteEditorPane(private val rootView: InnerPaneView, val model: PaletteE
         val shadowBuilder = View.DragShadowBuilder(draggableView)
         draggableView.startDragAndDrop(dragLoad, shadowBuilder, draggableView, 0)
 
-        isMovingColorAction = true
+        isColorMoved = model.isColorPoint(col, row)
+        isDragRemoveAction = false
 
-        dragFromCol = col
-        dragFromRow = row
+        moveFromCol = col
+        moveFromRow = row
 
         return true
     }
 
-    override fun onTapDown(e: MotionEvent, visibleX0: Float, visibleY0: Float): Boolean {
-        return false
-    }
-
-    override fun onScrollTo(e: MotionEvent, visibleX0: Float, visibleY0: Float): ScrollDirection? {
-        return null
-    }
-
-    override fun onTapUp(e: MotionEvent, visibleX0: Float, visibleY0: Float): Boolean {
-        return false
-    }
+    private var isDragRemoveAction = false
 
     override fun dragStarted(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
-        // Yes, we accept drag events
-        // TODO
-        draggedIsMarkedForDeletion = false
         return true
     }
 
     override fun dragEntered(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
-        // TODO
         return true
     }
 
     override fun dragExited(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
-        draggedIsMarkedForDeletion = false
+        isDragRemoveAction = true
         return true
     }
-
-    private var draggedIsMarkedForDeletion = false
 
     override fun dragLocation(e: DragEvent, visibleX0: Float, visibleY0: Float): ScrollDirection? {
         val col = columnAt(e.x, visibleX0)
         val row = rowAt(e.y, visibleY0)
 
-        if(isInRange(col, row)) {
-            listener.activateColorAt(col, row)
+        isDragRemoveAction = !isInRange(col, row)
 
-            if(isMovingColorAction) {
-                draggedIsMarkedForDeletion = false
-            }
+        if(!isDragRemoveAction) {
+            listener.selectColorAt(col, row)
         } else {
-            listener.deactivateColor()
-
-            if(isMovingColorAction) {
-                draggedIsMarkedForDeletion = true
-            }
+            listener.unselectColor()
         }
 
-        return ScrollDirection.Both
-    }
-
-    override fun dragEnded(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
-        listener.deactivateColor()
-        isMovingColorAction = false
         rootView.invalidate()
-        return true
+
+        return ScrollDirection.Both
     }
 
     override fun drop(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
         val col = columnAt(e.x, visibleX0)
         val row = rowAt(e.y, visibleY0)
+        listener.unselectColor()
 
-        val color = getColorFromClipData(e.clipData)
+        isDragRemoveAction = !isInRange(col, row)
 
-        val isAddColorAction = isInRange(col, row)
-        val isDeleteColorAction = !isAddColorAction && isMovingColorAction
-
-        if(isDeleteColorAction && !model.isColorPoint(dragFromCol, dragFromRow)) {
-            return false
-        }
-
-        if(isDeleteColorAction) {
-            listener.removeColorPointAt(dragFromCol, dragFromRow)
+        if(isColorMoved && !isDragRemoveAction) {
+            listener.moveColorPoint(moveFromCol, moveFromRow, col, row)
+            isColorMoved = false
             return true
         }
 
-        if(isMovingColorAction && col == dragFromCol && row == dragFromRow) {
+        if(isColorMoved) {
+            isColorMoved = false
+            isDragRemoveAction = false
+
+            if(model.isColorPoint(moveFromCol, moveFromRow)) {
+                listener.removeColorPointAt(moveFromCol, moveFromRow)
+                return true
+            }
+
             return false
         }
 
-        require(isAddColorAction)
-
-        listener.addColorPointAt(col, row, color)
-
-        if(isMovingColorAction) {
-            listener.removeColorPointAt(dragFromCol, dragFromRow)
+        if(!isDragRemoveAction) { // set color from palette
+            val color = getColorFromClipData(e.clipData)
+            listener.addColorPointAt(col, row, color)
+            return true
         }
 
+        isDragRemoveAction = false
+        return false
+    }
+
+    override fun dragEnded(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        if(isColorMoved) {
+            isColorMoved = false
+
+            if(isDragRemoveAction) {
+                listener.removeColorPointAt(moveFromCol, moveFromRow)
+                rootView.invalidate()
+                return true
+            }
+        }
+
+        rootView.invalidate()
         return true
     }
 
@@ -224,41 +226,52 @@ class PaletteEditorPane(private val rootView: InnerPaneView, val model: PaletteE
         canvas.drawRect(x0, y0, x0 + iconSize, y0 + iconSize, colorRectPaint)
     }
 
-    fun drawColor(canvas: Canvas, col: Int, row: Int, visibleX0: Float, visibleY0: Float) {
+    private fun overlayColor(color: Int): Int {
+        return if(Colors.brightness(color) < 0.25f) Color.WHITE else Color.BLACK
+    }
+
+    fun isDeleteDropAction(): Boolean {
+        return isColorMoved && isDragRemoveAction
+    }
+
+    private val selectedOverlayColor = Colors.transparent(transparency, rootView.resources.getColor(R.color.colorAccent, null))
+    private val deleteIcon: Drawable = rootView.resources.getDrawable(R.drawable.ic_clear_black_24dp, null)
+    private val pointIcon: Drawable = rootView.resources.getDrawable(R.drawable.ic_check_circle_black_24dp, null)
+
+    private fun drawColor(canvas: Canvas, col: Int, row: Int, visibleX0: Float, visibleY0: Float) {
         val x0 = x0At(col, visibleX0)
         val y0 = y0At(row, visibleY0)
 
         val isColorPoint = model.isColorPoint(col, row)
+        val color = model.colorAt(col, row)
+        drawColorAt(canvas, x0, y0, color)
 
-        // TODO: Change style Eg. each color gets an icon depending on it.
+        if(isColorPoint) {
+            val overlayIcon: Drawable
 
-        if(!isMovingColorAction || dragFromRow != row || dragFromCol != col) {
-            val color = model.colorAt(col, row)
-            drawColorAt(canvas, x0, y0, color)
-
-            if(isColorPoint) {
-                val overlayColor = if(Colors.brightness(color) < 0.5f) Color.WHITE else Color.BLACK
-                colorPointPaint.color = Colors.transparent(transparency, overlayColor)
-                canvas.drawCircle(x0 + iconSize / 2f, y0 + iconSize / 2f, iconSize / 8f, colorPointPaint)
+            if(isColorMoved && moveFromCol == col && moveFromRow == row) {
+                overlayIcon = deleteIcon
+            } else {
+                overlayIcon = pointIcon
             }
-        } else if(draggedIsMarkedForDeletion && isColorPoint) {
-            val d: Drawable = rootView.resources.getDrawable(R.drawable.ic_delete_black_24dp, null)
-            d.setBounds(x0.toInt(), y0.toInt(), (x0 + iconSize).toInt(), (y0 + iconSize).toInt())
-            d.draw(canvas)
+
+            val overlayIconColor = Colors.transparent(transparency, overlayColor(color))
+            overlayIcon.setTint(overlayIconColor)
+            overlayIcon.setBounds(x0.toInt(), y0.toInt(), (x0 + iconSize).toInt(), (y0 + iconSize).toInt())
+            overlayIcon.draw(canvas)
         }
 
-        // todo if out of range draw bin
-
         if(model.selectedCol == col && model.selectedRow == row) {
-            colorRectPaint.color = Colors.transparent(transparency, rootView.resources.getColor(R.color.colorAccent, null))
+            colorRectPaint.color = selectedOverlayColor
             canvas.drawRect(x0 - spacing / 2f, y0 - spacing / 2f, x0 + iconSize + spacing / 2f, y0 + iconSize + spacing / 2f, colorRectPaint)
         }
     }
 
     interface Listener {
-        fun activateColorAt(col: Int, row: Int)
-        fun deactivateColor()
+        fun selectColorAt(col: Int, row: Int)
+        fun unselectColor()
 
+        fun moveColorPoint(fromCol: Int, fromRow: Int, toCol: Int, toRow: Int)
         fun addColorPointAt(col: Int, row: Int, color: Int)
         fun removeColorPointAt(col: Int, row: Int)
 

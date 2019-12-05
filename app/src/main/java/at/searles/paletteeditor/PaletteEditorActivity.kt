@@ -3,6 +3,8 @@ package at.searles.paletteeditor
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.DragEvent
+import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import at.searles.multiscrollview.CompositionCrossPane
@@ -98,5 +100,18 @@ class PaletteEditorActivity : AppCompatActivity() {
         val vControlPane = VerticalEditTablePane(innerPaneView, palettePane).apply { listener = controller }
 
         innerPaneView.innerPane = CompositionCrossPane(vOffsetPane, hOffsetPane, vControlPane, hControlPane, palettePane)
+
+        // Fix if things are dragged into a different view
+        colorsView.setOnDragListener(FallBackDragListener(palettePane))
+    }
+
+    private class FallBackDragListener(val palettePane: PaletteEditorPane): View.OnDragListener {
+        override fun onDrag(v: View, event: DragEvent): Boolean {
+            return when(event.action) {
+                DragEvent.ACTION_DRAG_STARTED -> true
+                DragEvent.ACTION_DROP -> palettePane.isDeleteDropAction()
+                else -> false
+            }
+        }
     }
 }

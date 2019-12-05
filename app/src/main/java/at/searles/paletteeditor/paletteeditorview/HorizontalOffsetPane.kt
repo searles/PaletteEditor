@@ -16,11 +16,7 @@ class HorizontalOffsetPane(rootView: InnerPaneView, private val paletteEditorPan
 
     override val scrollDirection = ScrollDirection.Horizontal
 
-    override fun isInside(x: Float, y: Float, visibleX0: Float, visibleY0: Float): Boolean {
-        return -visibleX0 <= x && x < -visibleX0 + width && 0 <= y && y < height
-    }
-
-    private fun offsetFromX(x: Float, visibleX0: Float) = (x + visibleX0 - sliderIconSize / 2f) / width
+    private fun offsetFromX(x: Float, visibleX0: Float) = (x + visibleX0 - sliderIconSize / 2f) / (width - sliderIconSize)
 
     lateinit var listener: Listener
 
@@ -28,7 +24,7 @@ class HorizontalOffsetPane(rootView: InnerPaneView, private val paletteEditorPan
         listener.onHorizontalOffsetChanged(offsetFromX(e.x, visibleX0))
     }
 
-    override fun sliderIconX(visibleX0: Float) = model.offsetX * width - visibleX0 + sliderIconSize / 2f
+    override fun sliderIconX(visibleX0: Float) = model.offsetX * (width - sliderIconSize) - visibleX0 + sliderIconSize / 2f
     override fun sliderIconY(visibleY0: Float) = height / 2f
 
     override fun drawRuler(canvas: Canvas, visibleX0: Float, visibleY0: Float) {

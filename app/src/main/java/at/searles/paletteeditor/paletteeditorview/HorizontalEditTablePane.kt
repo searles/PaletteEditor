@@ -21,6 +21,9 @@ class HorizontalEditTablePane(private val rootView: InnerPaneView, private val p
         listener.removeColumn()
     }
 
+    override val plusDrawable: Int = R.drawable.ic_add_circle_arrow_left_24dp
+    override val minusDrawable: Int = R.drawable.ic_minus_circle_arrow_up_24dp
+
     override fun centerPlusX(visibleX0: Float) = 0f - visibleX0 - paletteEditorPane.iconSize / 2f
     override fun centerPlusY(visibleY0: Float) = height / 2f - visibleY0
 
@@ -28,7 +31,9 @@ class HorizontalEditTablePane(private val rootView: InnerPaneView, private val p
     override fun centerMinusY(visibleY0: Float) = height / 2f - visibleY0 - spacing
 
     override fun onDraw(canvas: Canvas, visibleX0: Float, visibleY0: Float, visibleWidth: Float, visibleHeight: Float) {
-        drawColorRange(canvas, 0 until (model.columnCount - 1), 0 .. 0, visibleX0, visibleY0)
+        val colorRangeEnd = if(model.columnCount > 1) model.columnCount - 1 else 1
+
+        drawColorRange(canvas, 0 until colorRangeEnd, 0 .. 0, visibleX0, visibleY0)
 
         drawPlus(canvas, centerPlusX(visibleX0), centerPlusY(visibleY0))
 
