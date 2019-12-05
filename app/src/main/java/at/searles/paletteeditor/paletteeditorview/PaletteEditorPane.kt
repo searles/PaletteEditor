@@ -186,14 +186,16 @@ class PaletteEditorPane(private val rootView: InnerPaneView, val model: PaletteE
     }
 
     override fun dragEnded(e: DragEvent, visibleX0: Float, visibleY0: Float): Boolean {
+        listener.unselectColor() // can happen if in a large table a fast drag moves to another view
+
         if(isColorMoved) {
             isColorMoved = false
 
-            if(isDragRemoveAction) {
-                listener.removeColorPointAt(moveFromCol, moveFromRow)
-                rootView.invalidate()
-                return true
-            }
+            // a color was dragged out of range, this means, delete it.
+
+            listener.removeColorPointAt(moveFromCol, moveFromRow)
+            rootView.invalidate()
+            return true
         }
 
         rootView.invalidate()

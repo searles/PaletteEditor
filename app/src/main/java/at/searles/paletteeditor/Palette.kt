@@ -70,7 +70,7 @@ class Palette(val width: Int, val height: Int, val offsetX: Float, val offsetY: 
                 parcel.writeInt(row.size())
 
                 for(k in 0 until row.size()) {
-                    val colKey = row.keyAt(i)
+                    val colKey = row.keyAt(k)
                     parcel.writeInt(colKey)
 
                     val lab = row.valueAt(k)
