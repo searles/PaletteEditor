@@ -19,7 +19,7 @@ import java.util.*
  */
 class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayout(context, attributeSet) {
 
-    var borderScrollMargin = 128f // FIXME dp-dependant
+    private var borderScrollMargin = 128f // FIXME dp-dependant
 
     private val initialBorderScrollStepSize
         get() = borderScrollMargin / 5f

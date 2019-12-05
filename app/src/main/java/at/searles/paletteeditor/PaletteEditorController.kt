@@ -1,10 +1,9 @@
 package at.searles.paletteeditor
 
-import at.searles.multiscrollview.InnerPaneView
 import at.searles.paletteeditor.paletteeditorview.*
 
 
-class PaletteEditorController(private val model: PaletteEditorModel, private val innerPaneView: InnerPaneView): PaletteEditorPane.Listener, VerticalOffsetPane.Listener, HorizontalOffsetPane.Listener, VerticalEditTablePane.Listener, HorizontalEditTablePane.Listener {
+class PaletteEditorController(private val model: PaletteEditorModel): PaletteEditorPane.Listener, VerticalOffsetPane.Listener, HorizontalOffsetPane.Listener, VerticalEditTablePane.Listener, HorizontalEditTablePane.Listener {
     private fun inRange(col: Int, row: Int): Boolean {
         return 0 <= col && col < model.columnCount && 0 <= row && row < model.rowCount
     }

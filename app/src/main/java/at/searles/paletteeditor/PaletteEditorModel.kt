@@ -1,11 +1,12 @@
 package at.searles.paletteeditor
 
-import android.graphics.Color
 import android.util.SparseArray
 import androidx.core.util.containsKey
+import androidx.core.util.forEach
 import at.searles.paletteeditor.colors.Lab
 import at.searles.paletteeditor.colors.Rgb
-import kotlin.math.*
+import kotlin.math.max
+import kotlin.math.min
 
 class PaletteEditorModel {
     private val listeners = ArrayList<Listener>()
@@ -44,7 +45,7 @@ class PaletteEditorModel {
     var selectedCol: Int = -1
         private set
 
-    private val colorList = ArrayList<Int>()
+    private var colorList: List<Int> = listOf(0)
 
     fun colorAt(col: Int, row: Int): Int {
         require(col < columnCount && row < rowCount) {"out of bounds"}
@@ -59,77 +60,7 @@ class PaletteEditorModel {
     }
 
     private fun updateInterpolatedColors() {
-        colorList.clear()
-
-        for(row in 0 until rowCount) {
-            for(col in 0 until columnCount) {
-                colorList.add(calculateColorAt(col, row))
-            }
-        }
-    }
-
-    private fun calculateColorAt(col: Int, row: Int): Int {
-        if(isColorPoint(col, row)) {
-            return colorPoints.get(row).get(col).toRgb().toArgb()
-        }
-
-        var sumWeights = 0.0
-        var l = 0.0
-        var a = 0.0
-        var b = 0.0
-        var alpha = 0.0
-
-        for(rowIndex in 0 until colorPoints.size()) {
-            val y = colorPoints.keyAt(rowIndex)
-
-            if(y >= rowCount) continue
-
-            val rowValues = colorPoints.valueAt(rowIndex)
-
-            for(colIndex in 0 until rowValues.size()) {
-                val x = rowValues.keyAt(colIndex)
-
-                if(x >= columnCount) continue
-
-                val lab = rowValues.valueAt(colIndex)
-
-                val weight = getWeight(x, y, col, row)
-                sumWeights += weight
-
-                alpha += lab.alpha * weight
-                l += lab.l * weight
-                a += lab.a * weight
-                b += lab.b * weight
-            }
-        }
-
-        return Lab((l / sumWeights).toFloat(), (a / sumWeights).toFloat(), (b / sumWeights).toFloat(), (alpha / sumWeights).toFloat()).toRgb().toArgb()
-    }
-
-    private fun getWeight(ptX: Int, ptY: Int, col: Int, row: Int): Double {
-        // The weight uses a round-about.
-        var weight = 0.0
-
-        (-1..1).forEach { yAdd ->
-            (-1..1).forEach { xAdd ->
-                weight += getSimpleWeight(ptX + columnCount * xAdd, ptY + rowCount * yAdd, col, row)
-            }
-        }
-
-        return weight
-    }
-
-    private fun getSimpleWeight(ptX: Int, ptY: Int, col: Int, row: Int): Double {
-        val dx = (ptX - col).toDouble() / columnCount
-        val dy = (ptY - row).toDouble() / rowCount
-
-        if(dx < -1.0 || 1.0 <= dx || dy < -1.0 || 1.0 <= dy) {
-            return 0.0
-        }
-
-        val dist2 = (dx * dx + dy * dy)
-
-        return 1.0 / (exp(weightExpFactor * dist2) - 1)
+        colorList = PaletteAdapter(columnCount, rowCount, colorPoints).createColorArray().map { it.toRgb().toArgb() }
     }
 
     fun isColorPoint(col: Int, row: Int): Boolean {
@@ -169,6 +100,25 @@ class PaletteEditorModel {
         listeners.add(listener)
     }
 
+    fun createPalette(): Palette {
+        return Palette(columnCount, rowCount, offsetX, offsetY, colorPoints)
+    }
+
+    fun restoreFromPalette(palette: Palette) {
+        colorPoints.clear()
+
+        columnCount = palette.width
+        rowCount = palette.height
+        offsetX = palette.offsetX
+        offsetY = palette.offsetY
+
+        palette.colorPoints.forEach { rowKey, row ->
+            colorPoints.put(rowKey, row.clone())
+        }
+
+        updateInterpolatedColors()
+    }
+
     interface Listener {
         fun onPaletteSizeChanged()
         fun onOffsetChanged()
@@ -178,6 +128,5 @@ class PaletteEditorModel {
 
     companion object {
         private const val alphaMask = 0xff000000.toInt()
-        private const val weightExpFactor = 12.0
     }
 }

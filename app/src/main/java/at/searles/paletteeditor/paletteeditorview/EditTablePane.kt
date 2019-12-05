@@ -1,32 +1,24 @@
 package at.searles.paletteeditor.paletteeditorview
 
 import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
 import android.graphics.drawable.Drawable
 import android.view.DragEvent
 import android.view.MotionEvent
 import at.searles.multiscrollview.InnerPane
 import at.searles.multiscrollview.InnerPaneView
 import at.searles.multiscrollview.ScrollDirection
-import at.searles.paletteeditor.R
+import at.searles.paletteeditor.Dpis
 import at.searles.paletteeditor.colors.Colors
 import kotlin.math.hypot
 
 abstract class EditTablePane(private val rootView: InnerPaneView, private val paletteEditorPane: PaletteEditorPane): InnerPane {
-    val iconSize
+    protected val iconSize
         get() = paletteEditorPane.iconSize
-
-    val spacing
-        get() = paletteEditorPane.spacing
 
     val model
         get() = paletteEditorPane.model
 
-    val buttonPaint = Paint().apply {
-        color = Color.BLACK
-        strokeWidth = 24f
-    }
+    protected val spacing: Float = Dpis.dpiToPx(rootView.resources, spacingDp)
 
     protected abstract fun plusClicked()
     protected abstract fun minusClicked()
@@ -127,6 +119,7 @@ abstract class EditTablePane(private val rootView: InnerPaneView, private val pa
     }
 
     companion object {
-        val transparency = 0.26f
+        const val transparency = 0.26f
+        const val spacingDp = 8f
     }
 }

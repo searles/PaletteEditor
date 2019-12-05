@@ -43,7 +43,6 @@ class PaletteEditorPane(private val rootView: InnerPaneView, val model: PaletteE
         get() = model.rowCount * (iconSize + spacing)
 
     private val colorRectPaint = Paint()
-    private val colorPointPaint = Paint().apply { style = Paint.Style.FILL }
 
     override fun onClick(e: MotionEvent, visibleX0: Float, visibleY0: Float): Boolean {
         return false
@@ -201,8 +200,8 @@ class PaletteEditorPane(private val rootView: InnerPaneView, val model: PaletteE
         return true
     }
 
-    fun columnAt(x: Float, visibleX0: Float): Int = ((x + visibleX0) / (iconSize + spacing) + 1f).toInt() - 1
-    fun rowAt(y: Float, visibleY0: Float): Int = ((y + visibleY0) / (iconSize + spacing) + 1f).toInt() - 1
+    private fun columnAt(x: Float, visibleX0: Float): Int = ((x + visibleX0) / (iconSize + spacing) + 1f).toInt() - 1
+    private fun rowAt(y: Float, visibleY0: Float): Int = ((y + visibleY0) / (iconSize + spacing) + 1f).toInt() - 1
 
     fun x0At(col: Int, visibleX0: Float) = (col * (iconSize + spacing) - visibleX0)
     fun y0At(row: Int, visibleY0: Float) = (row * (iconSize + spacing) - visibleY0)
@@ -236,7 +235,7 @@ class PaletteEditorPane(private val rootView: InnerPaneView, val model: PaletteE
 
     private val selectedOverlayColor = Colors.transparent(transparency, rootView.resources.getColor(R.color.colorAccent, null))
     private val deleteIcon: Drawable = rootView.resources.getDrawable(R.drawable.ic_clear_black_24dp, null)
-    private val pointIcon: Drawable = rootView.resources.getDrawable(R.drawable.ic_check_circle_black_24dp, null)
+    private val pointIcon: Drawable = rootView.resources.getDrawable(R.drawable.ic_check_black_24dp, null)
 
     private fun drawColor(canvas: Canvas, col: Int, row: Int, visibleX0: Float, visibleY0: Float) {
         val x0 = x0At(col, visibleX0)
@@ -249,10 +248,10 @@ class PaletteEditorPane(private val rootView: InnerPaneView, val model: PaletteE
         if(isColorPoint) {
             val overlayIcon: Drawable
 
-            if(isColorMoved && moveFromCol == col && moveFromRow == row) {
-                overlayIcon = deleteIcon
+            overlayIcon = if(isColorMoved && moveFromCol == col && moveFromRow == row) {
+                deleteIcon
             } else {
-                overlayIcon = pointIcon
+                pointIcon
             }
 
             val overlayIconColor = Colors.transparent(transparency, overlayColor(color))

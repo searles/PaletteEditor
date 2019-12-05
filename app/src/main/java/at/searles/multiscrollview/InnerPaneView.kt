@@ -5,9 +5,6 @@ import android.graphics.Canvas
 import android.util.AttributeSet
 import android.view.DragEvent
 import android.view.MotionEvent
-import android.view.View
-import android.widget.AbsoluteLayout
-import android.widget.LinearLayout
 import android.widget.RelativeLayout
 
 class InnerPaneView(context: Context, attrs: AttributeSet): RelativeLayout(context, attrs) {

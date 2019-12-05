@@ -1,10 +1,8 @@
 package at.searles.paletteeditor
 
-import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.DragEvent
-import android.view.View
+import android.os.PersistableBundle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import at.searles.multiscrollview.CompositionCrossPane
@@ -35,15 +33,20 @@ class PaletteEditorActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        initializePaletteModel()
+        initializePaletteModel(savedInstanceState?.getParcelable(paletteKey))
         initializeController()
 
         initializePaletteEditor()
         initializeColorsView()
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putParcelable(paletteKey, model.createPalette())
+    }
+
     private fun initializeController() {
-        controller = PaletteEditorController(model, innerPaneView)
+        controller = PaletteEditorController(model)
     }
 
     private fun initializeColorsView() {
@@ -53,19 +56,11 @@ class PaletteEditorActivity : AppCompatActivity() {
         )
     }
 
-    private fun initializePaletteModel() {
-        model = PaletteEditorModel().apply {
-            columnCount = 8
-            rowCount = 8
+    private fun initializePaletteModel(palette: Palette?) {
+        model = PaletteEditorModel()
 
-            setColorPoint(2, 2, Color.RED)
-            setColorPoint(0, 2, Color.GREEN)
-            setColorPoint(6, 5, Color.YELLOW)
-            setColorPoint(4, 0, Color.BLACK)
-            setColorPoint(3, 6, Color.BLUE)
-            setColorPoint(5, 1, Color.CYAN)
-            setColorPoint(1, 4, Color.WHITE)
-            setColorPoint(7, 7, Color.MAGENTA)
+        if(palette != null) {
+            model.restoreFromPalette(palette)
         }
 
         model.addListener(object: PaletteEditorModel.Listener {
@@ -100,18 +95,9 @@ class PaletteEditorActivity : AppCompatActivity() {
         val vControlPane = VerticalEditTablePane(innerPaneView, palettePane).apply { listener = controller }
 
         innerPaneView.innerPane = CompositionCrossPane(vOffsetPane, hOffsetPane, vControlPane, hControlPane, palettePane)
-
-        // Fix if things are dragged into a different view
-        colorsView.setOnDragListener(FallBackDragListener(palettePane))
     }
 
-    private class FallBackDragListener(val palettePane: PaletteEditorPane): View.OnDragListener {
-        override fun onDrag(v: View, event: DragEvent): Boolean {
-            return when(event.action) {
-                DragEvent.ACTION_DRAG_STARTED -> true
-                DragEvent.ACTION_DROP -> palettePane.isDeleteDropAction()
-                else -> false
-            }
-        }
+    companion object {
+        const val paletteKey = "palette"
     }
 }

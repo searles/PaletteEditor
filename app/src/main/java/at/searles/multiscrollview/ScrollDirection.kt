@@ -18,6 +18,6 @@ enum class ScrollDirection {
         override val isVertical = true
     };
 
-    abstract val isHorizontal: Boolean;
+    abstract val isHorizontal: Boolean
     abstract val isVertical: Boolean
 }

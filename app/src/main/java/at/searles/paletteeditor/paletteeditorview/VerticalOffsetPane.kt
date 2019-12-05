@@ -4,6 +4,7 @@ import android.graphics.Canvas
 import android.view.MotionEvent
 import at.searles.multiscrollview.InnerPaneView
 import at.searles.multiscrollview.ScrollDirection
+import at.searles.paletteeditor.R
 
 class VerticalOffsetPane(rootView: InnerPaneView, private val paletteEditorPane: PaletteEditorPane): OffsetPane(rootView, paletteEditorPane) {
     override val width: Float
@@ -22,14 +23,25 @@ class VerticalOffsetPane(rootView: InnerPaneView, private val paletteEditorPane:
     }
 
     override fun sliderIconX(visibleX0: Float) = width / 2f
-    override fun sliderIconY(visibleY0: Float) = model.offsetY * (height - sliderIconSize) - visibleY0 + sliderIconSize / 2f
+    override fun sliderIconY(visibleY0: Float) = model.offsetY * height - visibleY0
+
+    override val sliderIcon: Int = R.drawable.ic_slider_pointer_vertical_24dp
 
     override fun drawRuler(canvas: Canvas, visibleX0: Float, visibleY0: Float) {
-        sliderRulerPaint.color = activeColor
-        canvas.drawLine(width / 2f, 0f - visibleY0, width / 2f, sliderIconY(visibleY0) - sliderIconSize / 2f, sliderRulerPaint)
+        val start = 0f - visibleY0
+        val mid0 = sliderIconY(visibleY0) - sliderIconSize / 2f
+        val mid1 = sliderIconY(visibleY0) + sliderIconSize / 2f
+        val end = height - visibleY0
 
-        sliderRulerPaint.color = passiveColor
-        canvas.drawLine(width / 2f, sliderIconY(visibleY0) + sliderIconSize / 2f, width / 2f, (height - visibleY0).toFloat(), sliderRulerPaint)
+        if(start < mid0) {
+            sliderRulerPaint.color = activeColor
+            canvas.drawLine(width / 2f, start, width / 2f, mid0, sliderRulerPaint)
+        }
+
+        if(mid1 < end) {
+            sliderRulerPaint.color = passiveColor
+            canvas.drawLine(width / 2f, mid1, width / 2f, end, sliderRulerPaint)
+        }
     }
 
     interface Listener {
