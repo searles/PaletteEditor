@@ -14,13 +14,16 @@ class Palette(val width: Int, val height: Int, val offsetX: Float, val offsetY: 
         readColorPointsFromParcel(parcel)
     )
 
-
     override fun writeToParcel(dest: Parcel, flags: Int) {
         dest.writeInt(width)
         dest.writeInt(height)
         dest.writeFloat(offsetX)
         dest.writeFloat(offsetY)
         writeColorPointsToParcel(colorPoints, dest)
+    }
+
+    val colorTable: Array<Array<Lab>> by lazy {
+        PaletteAdapter(width, height, colorPoints).createColorTable()
     }
 
     override fun describeContents(): Int = 0

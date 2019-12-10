@@ -6,15 +6,12 @@ import at.searles.paletteeditor.colors.Lab
 import kotlin.math.exp
 
 class PaletteAdapter(val width: Int, val height: Int, private val colorPoints: SparseArray<SparseArray<Lab>>) {
-    fun createColorArray(): List<Lab> {
-        val list = ArrayList<Lab>(width * height)
-        for(y in 0 until height) {
-            for(x in 0 until width) {
-                list.add(calculateColorAt(x, y))
+    fun createColorTable(): Array<Array<Lab>> {
+        return Array(height) {y ->
+            Array(width) {x ->
+                calculateColorAt(x, y)
             }
         }
-
-        return list
     }
 
     private fun isColorPoint(x: Int, y: Int): Boolean {

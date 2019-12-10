@@ -45,11 +45,11 @@ class PaletteEditorModel {
     var selectedCol: Int = -1
         private set
 
-    private var colorList: List<Int> = listOf(0)
+    private lateinit var colorTable: Array<IntArray>
 
     fun colorAt(col: Int, row: Int): Int {
         require(col < columnCount && row < rowCount) {"out of bounds"}
-        return colorList[row * columnCount + col]
+        return colorTable[row][col]
     }
 
     fun setSelection(col: Int, row: Int) {
@@ -60,7 +60,13 @@ class PaletteEditorModel {
     }
 
     private fun updateInterpolatedColors() {
-        colorList = PaletteAdapter(columnCount, rowCount, colorPoints).createColorArray().map { it.toRgb().toArgb() }
+        val labColorTable = PaletteAdapter(columnCount, rowCount, colorPoints).createColorTable()
+
+        colorTable = Array(labColorTable.size) {y ->
+            IntArray(labColorTable[y].size) {x ->
+                labColorTable[y][x].toRgb().toArgb()
+            }
+        }
     }
 
     fun isColorPoint(col: Int, row: Int): Boolean {
