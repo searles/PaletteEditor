@@ -2,7 +2,6 @@ package at.searles.paletteeditor
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.PersistableBundle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import at.searles.multiscrollview.CompositionCrossPane
@@ -31,7 +30,7 @@ class PaletteEditorActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.palette_editor_activity_main)
 
         initializePaletteModel(savedInstanceState?.getParcelable(paletteKey))
         initializeController()

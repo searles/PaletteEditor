@@ -45,7 +45,7 @@ class PaletteEditorModel {
     var selectedCol: Int = -1
         private set
 
-    private lateinit var colorTable: Array<IntArray>
+    private var colorTable: Array<IntArray> = Array(1) { IntArray(1) { 0 } }
 
     fun colorAt(col: Int, row: Int): Int {
         require(col < columnCount && row < rowCount) {"out of bounds"}
