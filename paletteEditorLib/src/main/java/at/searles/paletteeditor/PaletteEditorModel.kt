@@ -98,6 +98,7 @@ class PaletteEditorModel {
         }
     }
 
+    @Suppress("unused")
     fun removeListener(listener: Listener) {
         listeners.remove(listener)
     }

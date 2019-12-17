@@ -1,9 +1,12 @@
 package at.searles.paletteeditor.demo
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.util.SparseArray
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import at.searles.paletteeditor.Palette
 import at.searles.paletteeditor.PaletteEditorActivity
 
 class DemoActivity : AppCompatActivity() {
@@ -12,14 +15,34 @@ class DemoActivity : AppCompatActivity() {
         findViewById<Button>(R.id.button)
     }
 
+    private lateinit var palette: Palette
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        palette = Palette(1, 1, 0f, 0f, SparseArray())
+
         runButton.setOnClickListener {
             Intent(this, PaletteEditorActivity::class.java).also {
-                startActivity(it)
+                it.putExtra(PaletteEditorActivity.paletteKey, palette)
+                startActivityForResult(it, paletteRequestCode)
             }
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        if(requestCode == paletteRequestCode) {
+            if(resultCode == Activity.RESULT_OK) {
+                palette = data!!.getParcelableExtra(paletteKey) as Palette
+            }
+        }
+
+        super.onActivityResult(requestCode, resultCode, data)
+    }
+
+    companion object {
+        const val paletteRequestCode = 111
+        const val paletteKey = PaletteEditorActivity.paletteKey
     }
 }

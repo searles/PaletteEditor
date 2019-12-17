@@ -3,7 +3,13 @@ package at.searles.paletteeditor
 import android.os.Parcel
 import android.os.Parcelable
 import android.util.SparseArray
+import androidx.core.util.forEach
+import androidx.core.util.set
+import at.searles.paletteeditor.colors.Colors
 import at.searles.paletteeditor.colors.Lab
+import at.searles.paletteeditor.colors.Rgb
+import org.json.JSONArray
+import org.json.JSONObject
 
 class Palette(val width: Int, val height: Int, val offsetX: Float, val offsetY: Float, val colorPoints: SparseArray<SparseArray<Lab>>): Parcelable {
     constructor(parcel: Parcel) : this(
@@ -22,13 +28,75 @@ class Palette(val width: Int, val height: Int, val offsetX: Float, val offsetY: 
         writeColorPointsToParcel(colorPoints, dest)
     }
 
+    @Suppress("unused")
     val colorTable: Array<Array<Lab>> by lazy {
         PaletteAdapter(width, height, colorPoints).createColorTable()
+    }
+
+    fun createJSONObject(): JSONObject {
+        val obj = JSONObject()
+
+        obj.put(widthKey, width)
+        obj.put(heightKey, height)
+        obj.put(offsetXKey, offsetX)
+        obj.put(offsetYKey, offsetY)
+
+        val array = JSONArray()
+
+        colorPoints.forEach { y, row ->
+            row.forEach { x, color ->
+                array.put(JSONObject().
+                    put(xKey, x).
+                    put(yKey, y).
+                    put(colorKey, Colors.toColorString(color.toRgb().toArgb()))
+                )
+            }
+        }
+
+        obj.put(pointsKey, array)
+
+        return obj
     }
 
     override fun describeContents(): Int = 0
 
     companion object CREATOR : Parcelable.Creator<Palette> {
+
+        const val widthKey = "width"
+        const val heightKey = "height"
+        const val offsetXKey = "offsetX"
+        const val offsetYKey = "offsetY"
+        const val pointsKey = "points"
+        const val xKey = "x"
+        const val yKey = "y"
+        const val colorKey = "color"
+
+        fun fromJSON(jsonString: String): Palette {
+            val obj = JSONObject(jsonString)
+
+            val width = obj.getInt(widthKey)
+            val height = obj.getInt(heightKey)
+            val offsetX = obj.getDouble(offsetXKey).toFloat()
+            val offsetY = obj.getDouble(offsetYKey).toFloat()
+
+            val points = obj.getJSONArray(pointsKey)
+            val colorPoints = SparseArray<SparseArray<Lab>>()
+
+            (0 until points.length()).forEach {
+                val point = points[it] as JSONObject
+
+                val x = point.get(xKey) as Int
+                val y = point.get(yKey) as Int
+                val color = Colors.fromColorString(point.get(colorKey).toString())
+
+                val row = colorPoints.get(y, SparseArray())
+                row[x] = Rgb.of(color).toLab()
+                colorPoints[y] = row
+            }
+
+            return Palette(width, height, offsetX, offsetY, colorPoints)
+        }
+
         override fun createFromParcel(parcel: Parcel): Palette {
             return Palette(parcel)
         }

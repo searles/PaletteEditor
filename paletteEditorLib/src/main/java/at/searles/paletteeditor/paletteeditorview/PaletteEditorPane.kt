@@ -248,9 +248,7 @@ class PaletteEditorPane(private val rootView: InnerPaneView, val model: PaletteE
         drawColorAt(canvas, x0, y0, color)
 
         if(isColorPoint) {
-            val overlayIcon: Drawable
-
-            overlayIcon = if(isColorMoved && moveFromCol == col && moveFromRow == row) {
+            val overlayIcon: Drawable = if(isColorMoved && moveFromCol == col && moveFromRow == row) {
                 deleteIcon
             } else {
                 pointIcon

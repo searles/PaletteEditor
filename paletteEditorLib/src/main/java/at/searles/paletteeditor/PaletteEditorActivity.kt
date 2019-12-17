@@ -1,16 +1,49 @@
 package at.searles.paletteeditor
 
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Button
+import android.widget.EditText
+import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import at.searles.android.storage.OpenSaveActivity
+import at.searles.android.storage.data.FilesProvider
 import at.searles.multiscrollview.CompositionCrossPane
 import at.searles.multiscrollview.InnerPaneView
 import at.searles.multiscrollview.MultiScrollView
 import at.searles.paletteeditor.colorsview.ColorsAdapter
 import at.searles.paletteeditor.paletteeditorview.*
 
-class PaletteEditorActivity : AppCompatActivity() {
+class PaletteEditorActivity : OpenSaveActivity() {
+
+    override var contentString: String
+        get() = model.createPalette().createJSONObject().toString(4)
+        set(value) { model.restoreFromPalette(Palette.fromJSON(value)) }
+
+    override val provider: FilesProvider by lazy {
+        PaletteFilesProvider(this)
+    }
+
+    override fun createReturnIntent(): Intent {
+        return Intent().apply {
+            putExtra(paletteKey, model.createPalette())
+        }
+    }
+
+    override val fileNameEditor: EditText by lazy {
+        findViewById<EditText>(R.id.nameEditText)
+    }
+
+    override val saveButton: Button by lazy {
+        findViewById<Button>(R.id.saveButton)
+    }
+
+    override val storageActivityTitle: String
+        get() = getString(R.string.openPalette)
 
     private val colorsView by lazy {
         findViewById<RecyclerView>(R.id.colorsView)
@@ -32,9 +65,14 @@ class PaletteEditorActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.palette_editor_activity_main)
 
-        initializePaletteModel(savedInstanceState?.getParcelable(paletteKey))
-        initializeController()
+        val palette = if (savedInstanceState != null) {
+            savedInstanceState.getParcelable<Palette>(paletteKey)
+        } else {
+            intent.getParcelableExtra(paletteKey)
+        }
 
+        initializePaletteModel(palette)
+        initializeController()
         initializePaletteEditor()
         initializeColorsView()
     }
@@ -44,12 +82,38 @@ class PaletteEditorActivity : AppCompatActivity() {
         outState.putParcelable(paletteKey, model.createPalette())
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.palette_editor_main_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId) {
+            R.id.openStorageAction -> {
+                startStorageActivity()
+                true
+            }
+            R.id.returnAction -> {
+                finishAndReturnContent()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     private fun initializeController() {
         controller = PaletteEditorController(model)
     }
 
     private fun initializeColorsView() {
-        colorsView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        val orientation = if (resources.configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            LinearLayout.HORIZONTAL
+        } else {
+            LinearLayout.VERTICAL
+        }
+
+        colorsView.layoutManager = LinearLayoutManager(this, orientation, false)
         colorsView.adapter = ColorsAdapter(
             this
         )
@@ -66,14 +130,17 @@ class PaletteEditorActivity : AppCompatActivity() {
             override fun onPaletteSizeChanged() {
                 multiScrollView.updateSize()
                 innerPaneView.invalidate()
+                contentChanged()
             }
 
             override fun onOffsetChanged() {
                 innerPaneView.invalidate()
+                contentChanged()
             }
 
             override fun onColorsChanged() {
                 innerPaneView.invalidate()
+                contentChanged()
             }
 
             override fun onSelectionChanged() {
