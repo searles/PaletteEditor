@@ -11,7 +11,7 @@ import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import at.searles.android.storage.OpenSaveActivity
-import at.searles.android.storage.data.FilesProvider
+import at.searles.android.storage.data.PathContentProvider
 import at.searles.multiscrollview.CompositionCrossPane
 import at.searles.multiscrollview.InnerPaneView
 import at.searles.multiscrollview.MultiScrollView
@@ -26,7 +26,7 @@ class PaletteEditorActivity : OpenSaveActivity() {
         get() = model.createPalette().createJson().toString(4)
         set(value) { model.restoreFromPalette(Palette.fromJson(JSONObject(value))) }
 
-    override val provider: FilesProvider by lazy {
+    override val provider: PathContentProvider by lazy {
         PaletteFilesProvider(this)
     }
 
