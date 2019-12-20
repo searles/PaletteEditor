@@ -17,12 +17,14 @@ import at.searles.multiscrollview.InnerPaneView
 import at.searles.multiscrollview.MultiScrollView
 import at.searles.paletteeditor.colorsview.ColorsAdapter
 import at.searles.paletteeditor.paletteeditorview.*
+import org.json.JSONObject
 
 class PaletteEditorActivity : OpenSaveActivity() {
 
+    // TODO: Check what happens if there is a bad format
     override var contentString: String
-        get() = model.createPalette().createJSONObject().toString(4)
-        set(value) { model.restoreFromPalette(Palette.fromJSON(value)) }
+        get() = model.createPalette().createJson().toString(4)
+        set(value) { model.restoreFromPalette(Palette.fromJson(JSONObject(value))) }
 
     override val provider: FilesProvider by lazy {
         PaletteFilesProvider(this)

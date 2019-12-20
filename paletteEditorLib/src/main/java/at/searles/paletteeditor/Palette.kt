@@ -33,7 +33,7 @@ class Palette(val width: Int, val height: Int, val offsetX: Float, val offsetY: 
         PaletteAdapter(width, height, colorPoints).createColorTable()
     }
 
-    fun createJSONObject(): JSONObject {
+    fun createJson(): JSONObject {
         val obj = JSONObject()
 
         obj.put(widthKey, width)
@@ -71,9 +71,7 @@ class Palette(val width: Int, val height: Int, val offsetX: Float, val offsetY: 
         const val yKey = "y"
         const val colorKey = "color"
 
-        fun fromJSON(jsonString: String): Palette {
-            val obj = JSONObject(jsonString)
-
+        fun fromJson(obj: JSONObject): Palette {
             val width = obj.getInt(widthKey)
             val height = obj.getInt(heightKey)
             val offsetX = obj.getDouble(offsetXKey).toFloat()
