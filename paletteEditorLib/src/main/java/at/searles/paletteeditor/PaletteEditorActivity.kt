@@ -31,9 +31,8 @@ class PaletteEditorActivity : OpenSaveActivity() {
     }
 
     override fun createReturnIntent(): Intent {
-        return Intent().apply {
-            putExtra(paletteKey, model.createPalette())
-        }
+        intent.putExtra(paletteKey, model.createPalette())
+        return intent
     }
 
     override val fileNameEditor: EditText by lazy {
