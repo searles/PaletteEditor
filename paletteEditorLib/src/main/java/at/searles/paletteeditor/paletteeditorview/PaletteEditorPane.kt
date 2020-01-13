@@ -17,6 +17,7 @@ import at.searles.multiscrollview.ScrollDirection
 import at.searles.paletteeditor.Dpis
 import at.searles.paletteeditor.PaletteEditorModel
 import at.searles.paletteeditor.R
+import at.searles.paletteeditor.ThemeUtils
 import at.searles.paletteeditor.colors.Colors
 import kotlin.math.max
 import kotlin.math.min
@@ -235,7 +236,7 @@ class PaletteEditorPane(private val rootView: InnerPaneView, val model: PaletteE
         return isColorMoved && isDragRemoveAction
     }
 
-    private val selectedOverlayColor = Colors.transparent(transparency, rootView.resources.getColor(R.color.colorAccent, null))
+    private val selectedOverlayColor = Colors.transparent(transparency, ThemeUtils.getThemeAccentColor(rootView.context))
     private val deleteIcon: Drawable = rootView.resources.getDrawable(R.drawable.ic_clear_black_24dp, null)
     private val pointIcon: Drawable = rootView.resources.getDrawable(R.drawable.ic_check_black_24dp, null)
 

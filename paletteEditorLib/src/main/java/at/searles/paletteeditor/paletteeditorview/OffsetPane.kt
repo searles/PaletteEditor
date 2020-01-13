@@ -8,7 +8,7 @@ import at.searles.multiscrollview.InnerPane
 import at.searles.multiscrollview.InnerPaneView
 import at.searles.multiscrollview.ScrollDirection
 import at.searles.paletteeditor.Dpis
-import at.searles.paletteeditor.R
+import at.searles.paletteeditor.ThemeUtils
 import at.searles.paletteeditor.colors.Colors
 import kotlin.math.hypot
 
@@ -22,7 +22,7 @@ abstract class OffsetPane(private val rootView: InnerPaneView, private val palet
     val sliderIconSize
         get() = iconSize / 1.5f
 
-    val activeColor = rootView.resources.getColor(R.color.colorAccent, null)
+    val activeColor = ThemeUtils.getThemeAccentColor(rootView.context)
     val passiveColor = Colors.toGray(activeColor)
 
     private var isDragging = false
