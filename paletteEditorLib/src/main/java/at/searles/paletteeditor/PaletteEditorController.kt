@@ -1,16 +1,36 @@
 package at.searles.paletteeditor
 
+import android.app.Activity
+import android.content.Context
+import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
+import at.searles.colorpicker.dialog.ColorDialogCallback
+import at.searles.colorpicker.dialog.ColorDialogFragment
 import at.searles.paletteeditor.paletteeditorview.*
 
 
-class PaletteEditorController(private val model: PaletteEditorModel): PaletteEditorPane.Listener, VerticalOffsetPane.Listener, HorizontalOffsetPane.Listener, VerticalEditTablePane.Listener, HorizontalEditTablePane.Listener {
+class PaletteEditorController(private val activity: AppCompatActivity, private val model: PaletteEditorModel): PaletteEditorPane.Listener, VerticalOffsetPane.Listener, HorizontalOffsetPane.Listener, VerticalEditTablePane.Listener, HorizontalEditTablePane.Listener, ColorDialogCallback {
     private fun inRange(col: Int, row: Int): Boolean {
         return 0 <= col && col < model.columnCount && 0 <= row && row < model.rowCount
     }
 
     override fun editColorPointAt(col: Int, row: Int) {
         require(inRange(col, row))
-        // TODO Open edit-color dialog.
+
+        val bundle = Bundle().apply {
+            putInt(rowKey, row)
+            putInt(columnKey, col)
+        }
+
+        ColorDialogFragment.newInstance(model.colorAt(col, row), bundle).
+            show(activity.supportFragmentManager, "dialog")
+    }
+
+    override fun setColor(dialogFragment: ColorDialogFragment, color: Int) {
+        val row = dialogFragment.arguments!!.getInt(rowKey)
+        val col = dialogFragment.arguments!!.getInt(columnKey)
+
+        model.setColorPoint(col, row, color)
     }
 
     override fun removeColorPointAt(col: Int, row: Int) {
@@ -73,5 +93,10 @@ class PaletteEditorController(private val model: PaletteEditorModel): PaletteEdi
         if(model.columnCount > 1) {
             model.columnCount--
         }
+    }
+
+    companion object {
+        private const val rowKey = "row"
+        private const val columnKey = "column"
     }
 }

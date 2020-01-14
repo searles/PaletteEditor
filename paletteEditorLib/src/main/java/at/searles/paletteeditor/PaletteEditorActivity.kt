@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import at.searles.android.storage.OpenSaveActivity
 import at.searles.android.storage.data.PathContentProvider
+import at.searles.colorpicker.dialog.ColorDialogCallback
+import at.searles.colorpicker.dialog.ColorDialogFragment
 import at.searles.multiscrollview.CompositionCrossPane
 import at.searles.multiscrollview.InnerPaneView
 import at.searles.multiscrollview.MultiScrollView
@@ -19,7 +21,7 @@ import at.searles.paletteeditor.colorsview.ColorsAdapter
 import at.searles.paletteeditor.paletteeditorview.*
 import org.json.JSONObject
 
-class PaletteEditorActivity : OpenSaveActivity() {
+class PaletteEditorActivity : OpenSaveActivity(), ColorDialogCallback {
 
     // TODO: Check what happens if there is a bad format
     override var contentString: String
@@ -104,7 +106,7 @@ class PaletteEditorActivity : OpenSaveActivity() {
     }
 
     private fun initializeController() {
-        controller = PaletteEditorController(model)
+        controller = PaletteEditorController(this, model)
     }
 
     private fun initializeColorsView() {
@@ -166,5 +168,9 @@ class PaletteEditorActivity : OpenSaveActivity() {
 
     companion object {
         const val paletteKey = "palette"
+    }
+
+    override fun setColor(dialogFragment: ColorDialogFragment, color: Int) {
+        controller.setColor(dialogFragment, color)
     }
 }
