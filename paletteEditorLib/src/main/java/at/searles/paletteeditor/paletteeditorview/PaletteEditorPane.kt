@@ -45,11 +45,11 @@ class PaletteEditorPane(private val rootView: InnerPaneView, val model: PaletteE
 
     private val colorRectPaint = Paint()
 
-    override fun onClick(e: MotionEvent, visibleX0: Float, visibleY0: Float): Boolean {
+    override fun onDoubleClick(e: MotionEvent, visibleX0: Float, visibleY0: Float): Boolean {
         return false
     }
 
-    override fun onDoubleClick(e: MotionEvent, visibleX0: Float, visibleY0: Float): Boolean {
+    override fun onClick(e: MotionEvent, visibleX0: Float, visibleY0: Float): Boolean {
         val col = columnAt(e.x, visibleX0)
         val row = rowAt(e.y, visibleY0)
 
@@ -230,10 +230,6 @@ class PaletteEditorPane(private val rootView: InnerPaneView, val model: PaletteE
 
     private fun overlayColor(color: Int): Int {
         return if(Colors.brightness(color) < 0.25f) Color.WHITE else Color.BLACK
-    }
-
-    fun isDeleteDropAction(): Boolean {
-        return isColorMoved && isDragRemoveAction
     }
 
     private val selectedOverlayColor = Colors.transparent(transparency, ThemeUtils.getThemeAccentColor(rootView.context))
