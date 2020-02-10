@@ -11,6 +11,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
 import android.widget.RelativeLayout
+import at.searles.commons.color.Colors
 import at.searles.multiscrollview.InnerPane
 import at.searles.multiscrollview.InnerPaneView
 import at.searles.multiscrollview.ScrollDirection
@@ -18,7 +19,6 @@ import at.searles.paletteeditor.Dpis
 import at.searles.paletteeditor.PaletteEditorModel
 import at.searles.paletteeditor.R
 import at.searles.paletteeditor.ThemeUtils
-import at.searles.paletteeditor.colors.Colors
 import kotlin.math.max
 import kotlin.math.min
 

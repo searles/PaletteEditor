@@ -8,9 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import androidx.recyclerview.widget.RecyclerView
+import at.searles.commons.color.Colors
 import at.searles.paletteeditor.R
-import at.searles.paletteeditor.colors.Colors
-import at.searles.paletteeditor.colors.DefaultColors
+import at.searles.paletteeditor.DefaultColors
 
 class ColorsAdapter(private val context: Context) : RecyclerView.Adapter<ColorsAdapter.ViewHolder>() {
     val colors = DefaultColors.colors

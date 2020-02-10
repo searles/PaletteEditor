@@ -2,9 +2,10 @@ package at.searles.paletteeditor
 
 import android.util.SparseArray
 import androidx.core.util.containsKey
-import androidx.core.util.forEach
-import at.searles.paletteeditor.colors.Lab
-import at.searles.paletteeditor.colors.Rgb
+import at.searles.commons.color.Lab
+import at.searles.commons.color.Palette
+import at.searles.commons.color.Rgb
+import at.searles.commons.util.IntIntMap
 import kotlin.math.max
 import kotlin.math.min
 
@@ -26,7 +27,7 @@ class PaletteEditorModel {
             listeners.forEach { it.onPaletteSizeChanged() }
         }
 
-    private val colorPoints = SparseArray<SparseArray<Lab>>() // [row][col]
+    private val colorPoints = IntIntMap<Lab>() // [row][col]
 
     var offsetX: Float = 0f
         set(value) {
@@ -60,7 +61,7 @@ class PaletteEditorModel {
     }
 
     private fun updateInterpolatedColors() {
-        val labColorTable = PaletteAdapter(columnCount, rowCount, colorPoints).createColorTable()
+        val labColorTable = Palette(columnCount, rowCount, 0f, 0f, colorPoints).colorTable
 
         colorTable = Array(labColorTable.size) {y ->
             IntArray(labColorTable[y].size) {x ->
@@ -70,7 +71,7 @@ class PaletteEditorModel {
     }
 
     fun isColorPoint(col: Int, row: Int): Boolean {
-        return colorPoints.containsKey(row) && colorPoints.get(row).containsKey(col)
+        return colorPoints.containsKey(col, row)
     }
 
     fun setColorPoint(col: Int, row: Int, rgb: Int) {
@@ -78,21 +79,15 @@ class PaletteEditorModel {
 
         val argb = if((rgb and alphaMask) == 0) alphaMask or rgb else rgb
 
-        var rowValues = colorPoints.get(row)
+        colorPoints[col, row] = Rgb.of(argb).toLab()
 
-        if(rowValues == null) {
-            rowValues = SparseArray()
-            colorPoints.put(row, rowValues)
-        }
-
-        rowValues.put(col, Rgb.of(argb).toLab())
         updateInterpolatedColors()
         listeners.forEach { it.onColorsChanged() }
     }
 
     fun removeColorPoint(col: Int, row: Int) {
         if(isColorPoint(col, row)) {
-            colorPoints.get(row).remove(col)
+            colorPoints.remove(col, row)
             updateInterpolatedColors()
             listeners.forEach { it.onColorsChanged() }
         }
@@ -119,8 +114,8 @@ class PaletteEditorModel {
         offsetX = palette.offsetX
         offsetY = palette.offsetY
 
-        palette.colorPoints.forEach { rowKey, row ->
-            colorPoints.put(rowKey, row.clone())
+        palette.colorPoints.forEach { entry ->
+            colorPoints[entry.x, entry.y] = entry.color
         }
 
         updateInterpolatedColors()

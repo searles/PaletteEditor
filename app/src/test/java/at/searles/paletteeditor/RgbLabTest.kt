@@ -1,6 +1,5 @@
 package at.searles.paletteeditor
 
-import at.searles.paletteeditor.colors.Rgb
 import org.junit.Test
 
 import org.junit.Assert.*

@@ -14,6 +14,7 @@ import at.searles.android.storage.OpenSaveActivity
 import at.searles.android.storage.data.PathContentProvider
 import at.searles.colorpicker.dialog.ColorDialogCallback
 import at.searles.colorpicker.dialog.ColorDialogFragment
+import at.searles.commons.color.Palette
 import at.searles.multiscrollview.CompositionCrossPane
 import at.searles.multiscrollview.InnerPaneView
 import at.searles.multiscrollview.MultiScrollView
@@ -23,17 +24,19 @@ import org.json.JSONObject
 
 class PaletteEditorActivity : OpenSaveActivity(), ColorDialogCallback {
 
-    // TODO: Check what happens if there is a bad format
+    /**
+     * set throws a JSONException in case of an error!
+     */
     override var contentString: String
-        get() = model.createPalette().createJson().toString(4)
-        set(value) { model.restoreFromPalette(Palette.fromJson(JSONObject(value))) }
+        get() = PaletteAdapter.toJson(model.createPalette()).toString(4)
+        set(value) { model.restoreFromPalette(PaletteAdapter.toPalette(JSONObject(value))) }
 
     override val provider: PathContentProvider by lazy {
         PaletteFilesProvider(this)
     }
 
     override fun createReturnIntent(): Intent {
-        intent.putExtra(paletteKey, model.createPalette())
+        intent.putExtra(paletteKey, PaletteAdapter.toBundle(model.createPalette()))
         return intent
     }
 
@@ -68,13 +71,13 @@ class PaletteEditorActivity : OpenSaveActivity(), ColorDialogCallback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.palette_editor_activity_main)
 
-        val palette = if (savedInstanceState != null) {
-            savedInstanceState.getParcelable<Palette>(paletteKey)
+        val paletteBundle = if (savedInstanceState != null) {
+            savedInstanceState.getBundle(paletteKey)!!
         } else {
-            intent.getParcelableExtra(paletteKey)
+            intent.getBundleExtra(paletteKey)
         }
 
-        initializePaletteModel(palette)
+        initializePaletteModel(PaletteAdapter.toPalette(paletteBundle))
         initializeController()
         initializePaletteEditor()
         initializeColorsView()
@@ -82,7 +85,7 @@ class PaletteEditorActivity : OpenSaveActivity(), ColorDialogCallback {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putParcelable(paletteKey, model.createPalette())
+        outState.putBundle(paletteKey, PaletteAdapter.toBundle(model.createPalette()))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

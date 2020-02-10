@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.util.SparseArray
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
-import at.searles.paletteeditor.Palette
 import at.searles.paletteeditor.PaletteEditorActivity
 
 class DemoActivity : AppCompatActivity() {

@@ -4,12 +4,12 @@ import android.graphics.Canvas
 import android.graphics.Paint
 import android.view.DragEvent
 import android.view.MotionEvent
+import at.searles.commons.color.Colors
 import at.searles.multiscrollview.InnerPane
 import at.searles.multiscrollview.InnerPaneView
 import at.searles.multiscrollview.ScrollDirection
 import at.searles.paletteeditor.Dpis
 import at.searles.paletteeditor.ThemeUtils
-import at.searles.paletteeditor.colors.Colors
 import kotlin.math.hypot
 
 abstract class OffsetPane(private val rootView: InnerPaneView, private val paletteEditorPane: PaletteEditorPane): InnerPane {

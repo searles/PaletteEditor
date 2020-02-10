@@ -1,88 +1,100 @@
 package at.searles.paletteeditor
 
-import android.util.SparseArray
-import androidx.core.util.containsKey
-import at.searles.paletteeditor.colors.Lab
-import kotlin.math.exp
+import android.os.Bundle
+import at.searles.commons.color.Colors
+import at.searles.commons.color.Lab
+import at.searles.commons.color.Palette
+import at.searles.commons.color.Rgb
+import at.searles.commons.util.IntIntMap
+import org.json.JSONArray
+import org.json.JSONObject
 
-class PaletteAdapter(val width: Int, val height: Int, private val colorPoints: SparseArray<SparseArray<Lab>>) {
-    fun createColorTable(): Array<Array<Lab>> {
-        return Array(height) {y ->
-            Array(width) {x ->
-                calculateColorAt(x, y)
-            }
-        }
-    }
 
-    private fun isColorPoint(x: Int, y: Int): Boolean {
-        return colorPoints.containsKey(y) && colorPoints.get(y).containsKey(x)
-    }
+object PaletteAdapter {
+    fun toPalette(bundle: Bundle) : Palette {
+        val width = bundle.getInt(widthKey)
+        val height = bundle.getInt(heightKey)
+        val offsetX = bundle.getFloat(offsetXKey)
+        val offsetY = bundle.getFloat(offsetYKey)
 
-    private fun calculateColorAt(x: Int, y: Int): Lab {
-        if(isColorPoint(x, y)) {
-            return colorPoints.get(y).get(x)
-        }
+        val colorMap = IntIntMap<Lab>()
 
-        var sumWeights = 0.0
-        var l = 0.0
-        var a = 0.0
-        var b = 0.0
-        var alpha = 0.0
+        val colorArray = bundle.getIntArray(colorKey)!!
 
-        for(yIndex in 0 until colorPoints.size()) {
-            val yKey = colorPoints.keyAt(yIndex)
-
-            if(yKey >= height) continue
-
-            val rowValues = colorPoints.valueAt(yIndex)
-
-            for(xIndex in 0 until rowValues.size()) {
-                val xKey = rowValues.keyAt(xIndex)
-
-                if(xKey >= width) continue
-
-                val lab = rowValues.valueAt(xIndex)
-
-                val weight = getWeight(xKey, yKey, x, y)
-                sumWeights += weight
-
-                alpha += lab.alpha * weight
-                l += lab.l * weight
-                a += lab.a * weight
-                b += lab.b * weight
-            }
+        for(i in colorArray.indices step 3) {
+            colorMap[colorArray[0], colorArray[1]] = Rgb.of(colorArray[2]).toLab()
         }
 
-        return Lab((l / sumWeights).toFloat(), (a / sumWeights).toFloat(), (b / sumWeights).toFloat(), (alpha / sumWeights).toFloat())
+        return Palette(width, height, offsetX, offsetY, colorMap)
     }
 
-    private fun getWeight(ptX: Int, ptY: Int, col: Int, row: Int): Double {
-        // The weight uses a round-about.
-        var weight = 0.0
+    fun toBundle(palette: Palette): Bundle {
+        val bundle = Bundle()
 
-        (-1..1).forEach { yAdd ->
-            (-1..1).forEach { xAdd ->
-                weight += getSimpleWeight(ptX + width * xAdd, ptY + height * yAdd, col, row)
-            }
+        bundle.putInt(widthKey, palette.width)
+        bundle.putInt(heightKey, palette.height)
+        bundle.putFloat(offsetXKey, palette.offsetX)
+        bundle.putFloat(offsetYKey, palette.offsetY)
+
+        val colors: List<Int> = palette.colorPoints.flatMap { entry -> listOf(entry.x, entry.y, entry.color.toRgb().toArgb() )}
+
+        bundle.putIntArray(colorKey, colors.toIntArray())
+
+        return bundle
+    }
+
+    fun toJson(palette: Palette): JSONObject {
+        val obj = JSONObject()
+
+        obj.put(widthKey, palette.width)
+        obj.put(heightKey, palette.height)
+        obj.put(offsetXKey, palette.offsetX)
+        obj.put(offsetYKey, palette.offsetY)
+
+        val array = JSONArray()
+
+        palette.colorPoints.forEach { entry ->
+            array.put(
+                JSONObject().
+                put(xKey, entry.x).
+                put(yKey, entry.y).
+                put(colorKey, Colors.toColorString(entry.color.toRgb().toArgb()))
+            )
+       }
+
+        obj.put(pointsKey, array)
+
+        return obj
+    }
+
+    fun toPalette(obj: JSONObject): Palette {
+        val width = obj.getInt(widthKey)
+        val height = obj.getInt(heightKey)
+        val offsetX = obj.getDouble(offsetXKey).toFloat()
+        val offsetY = obj.getDouble(offsetYKey).toFloat()
+
+        val points = obj.getJSONArray(pointsKey)
+        val colorMap = IntIntMap<Lab>()
+
+        (0 until points.length()).forEach {
+            val point = points[it] as JSONObject
+
+            val x = point.get(xKey) as Int
+            val y = point.get(yKey) as Int
+            val color = Colors.fromColorString(point.get(colorKey).toString())
+
+            colorMap[x, y] = Rgb.of(color).toLab()
         }
 
-        return weight
+        return Palette(width, height, offsetX, offsetY, colorMap)
     }
 
-    private fun getSimpleWeight(ptX: Int, ptY: Int, col: Int, row: Int): Double {
-        val dx = (ptX - col).toDouble() / width
-        val dy = (ptY - row).toDouble() / height
-
-        if(dx < -1.0 || 1.0 <= dx || dy < -1.0 || 1.0 <= dy) {
-            return 0.0
-        }
-
-        val dist2 = (dx * dx + dy * dy)
-
-        return 1.0 / (exp(weightExpFactor * dist2) - 1)
-    }
-
-    companion object {
-        private const val weightExpFactor = 12.0
-    }
+    private const val widthKey = "width"
+    private const val heightKey = "height"
+    private const val offsetXKey = "offsetX"
+    private const val offsetYKey = "offsetY"
+    private const val pointsKey = "points"
+    private const val xKey = "x"
+    private const val yKey = "y"
+    private const val colorKey = "color"
 }
