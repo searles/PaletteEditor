@@ -3,9 +3,11 @@ package at.searles.paletteeditor.demo
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.util.SparseArray
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import at.searles.commons.color.Palette
+import at.searles.commons.util.IntIntMap
+import at.searles.paletteeditor.PaletteAdapter
 import at.searles.paletteeditor.PaletteEditorActivity
 
 class DemoActivity : AppCompatActivity() {
@@ -20,11 +22,11 @@ class DemoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        palette = Palette(1, 1, 0f, 0f, SparseArray())
+        palette = Palette(1, 1, 0f, 0f, IntIntMap())
 
         runButton.setOnClickListener {
             Intent(this, PaletteEditorActivity::class.java).also {
-                it.putExtra(PaletteEditorActivity.paletteKey, palette)
+                it.putExtra(PaletteEditorActivity.paletteKey, PaletteAdapter.toBundle(palette))
                 startActivityForResult(it, paletteRequestCode)
             }
         }
@@ -33,7 +35,7 @@ class DemoActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if(requestCode == paletteRequestCode) {
             if(resultCode == Activity.RESULT_OK) {
-                palette = data!!.getParcelableExtra(paletteKey) as Palette
+                palette = PaletteAdapter.toPalette(data!!.getBundleExtra(paletteKey)!!)
             }
         }
 

@@ -115,7 +115,7 @@ class PaletteEditorModel {
         offsetY = palette.offsetY
 
         palette.colorPoints.forEach { entry ->
-            colorPoints[entry.x, entry.y] = entry.color
+            colorPoints[entry.x, entry.y] = entry.value
         }
 
         updateInterpolatedColors()

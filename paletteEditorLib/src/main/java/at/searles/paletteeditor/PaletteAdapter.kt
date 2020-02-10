@@ -36,7 +36,7 @@ object PaletteAdapter {
         bundle.putFloat(offsetXKey, palette.offsetX)
         bundle.putFloat(offsetYKey, palette.offsetY)
 
-        val colors: List<Int> = palette.colorPoints.flatMap { entry -> listOf(entry.x, entry.y, entry.color.toRgb().toArgb() )}
+        val colors: List<Int> = palette.colorPoints.flatMap { entry -> listOf(entry.x, entry.y, entry.value.toRgb().toArgb() )}
 
         bundle.putIntArray(colorKey, colors.toIntArray())
 
@@ -58,7 +58,7 @@ object PaletteAdapter {
                 JSONObject().
                 put(xKey, entry.x).
                 put(yKey, entry.y).
-                put(colorKey, Colors.toColorString(entry.color.toRgb().toArgb()))
+                put(colorKey, Colors.toColorString(entry.value.toRgb().toArgb()))
             )
        }
 
