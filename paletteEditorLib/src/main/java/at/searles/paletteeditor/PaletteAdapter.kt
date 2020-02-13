@@ -22,7 +22,7 @@ object PaletteAdapter {
         val colorArray = bundle.getIntArray(colorKey)!!
 
         for(i in colorArray.indices step 3) {
-            colorMap[colorArray[0], colorArray[1]] = Rgb.of(colorArray[2]).toLab()
+            colorMap[colorArray[i], colorArray[i + 1]] = Rgb.of(colorArray[i + 2]).toLab()
         }
 
         return Palette(width, height, offsetX, offsetY, colorMap)

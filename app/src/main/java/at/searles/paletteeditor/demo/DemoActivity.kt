@@ -5,7 +5,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
+import at.searles.commons.color.Lab
 import at.searles.commons.color.Palette
+import at.searles.commons.color.Rgb
 import at.searles.commons.util.IntIntMap
 import at.searles.paletteeditor.PaletteAdapter
 import at.searles.paletteeditor.PaletteEditorActivity
@@ -22,7 +24,11 @@ class DemoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        palette = Palette(1, 1, 0f, 0f, IntIntMap())
+        palette = Palette(3, 2, 0.6f, 0.3f, IntIntMap<Lab>().apply {
+            this[0, 0] = Rgb(1f, 0f, 0f).toLab()
+            this[1, 1] = Rgb(0f, 1f, 0f).toLab()
+            this[2, 0] = Rgb(0f, 0f, 1f).toLab()
+        })
 
         runButton.setOnClickListener {
             Intent(this, PaletteEditorActivity::class.java).also {
