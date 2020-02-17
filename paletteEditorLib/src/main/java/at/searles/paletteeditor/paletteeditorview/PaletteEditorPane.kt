@@ -228,13 +228,15 @@ class PaletteEditorPane(private val rootView: InnerPaneView, val model: PaletteE
         canvas.drawRect(x0, y0, x0 + iconSize, y0 + iconSize, colorRectPaint)
     }
 
-    private fun overlayColor(color: Int): Int {
-        return if(Colors.brightness(color) < 0.25f) Color.WHITE else Color.BLACK
+    private fun isLightOverlayColor(color: Int): Boolean {
+        return Colors.brightness(color) < 0.25f
     }
 
     private val selectedOverlayColor = Colors.transparent(transparency, ThemeUtils.getThemeAccentColor(rootView.context))
-    private val deleteIcon: Drawable = rootView.resources.getDrawable(R.drawable.ic_clear_black_24dp, null)
-    private val pointIcon: Drawable = rootView.resources.getDrawable(R.drawable.ic_check_black_24dp, null)
+    private val deleteIconBlack: Drawable = rootView.resources.getDrawable(R.drawable.ic_clear_black_24dp, null)
+    private val pointIconBlack: Drawable = rootView.resources.getDrawable(R.drawable.ic_check_black_24dp, null)
+    private val deleteIconWhite: Drawable = rootView.resources.getDrawable(R.drawable.ic_clear_white_24dp, null)
+    private val pointIconWhite: Drawable = rootView.resources.getDrawable(R.drawable.ic_check_white_24dp, null)
 
     private fun drawColor(canvas: Canvas, col: Int, row: Int, visibleX0: Float, visibleY0: Float) {
         val x0 = x0At(col, visibleX0)
@@ -246,14 +248,17 @@ class PaletteEditorPane(private val rootView: InnerPaneView, val model: PaletteE
 
         if(isColorPoint) {
             val overlayIcon: Drawable = if(isColorMoved && moveFromCol == col && moveFromRow == row) {
-                deleteIcon
+                if(isLightOverlayColor(color))
+                    deleteIconWhite
+                else
+                    deleteIconBlack
             } else {
-                pointIcon
+                if(isLightOverlayColor(color))
+                    pointIconWhite
+                else
+                    pointIconBlack
             }
 
-            // TODO: The bug seems to be here.
-            val overlayIconColor = Colors.transparent(transparency, overlayColor(color))
-            overlayIcon.setTint(overlayIconColor)
             overlayIcon.setBounds(x0.toInt(), y0.toInt(), (x0 + iconSize).toInt(), (y0 + iconSize).toInt())
             overlayIcon.draw(canvas)
         }
