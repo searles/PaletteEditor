@@ -22,7 +22,7 @@ import at.searles.paletteeditor.ThemeUtils
 import kotlin.math.max
 import kotlin.math.min
 
-
+// TODO Bad color hook
 class PaletteEditorPane(private val rootView: InnerPaneView, val model: PaletteEditorModel): InnerPane {
 
     val iconSize: Float = Dpis.dpiToPx(
@@ -251,6 +251,7 @@ class PaletteEditorPane(private val rootView: InnerPaneView, val model: PaletteE
                 pointIcon
             }
 
+            // TODO: The bug seems to be here.
             val overlayIconColor = Colors.transparent(transparency, overlayColor(color))
             overlayIcon.setTint(overlayIconColor)
             overlayIcon.setBounds(x0.toInt(), y0.toInt(), (x0 + iconSize).toInt(), (y0 + iconSize).toInt())

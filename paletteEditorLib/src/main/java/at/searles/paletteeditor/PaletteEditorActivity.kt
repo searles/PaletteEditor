@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
+import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import at.searles.android.storage.OpenSaveActivity
@@ -63,6 +64,11 @@ class PaletteEditorActivity : OpenSaveActivity(), ColorDialogCallback {
         multiScrollView.findViewById<InnerPaneView>(R.id.innerPaneView)
     }
 
+    private val toolbar: Toolbar by lazy {
+        findViewById<Toolbar>(R.id.toolbar)
+    }
+
+
     private lateinit var model: PaletteEditorModel
     private lateinit var palettePane: PaletteEditorPane
     private lateinit var controller: PaletteEditorController
@@ -70,6 +76,7 @@ class PaletteEditorActivity : OpenSaveActivity(), ColorDialogCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.palette_editor_activity_main)
+        setSupportActionBar(toolbar)
 
         val paletteBundle = if (savedInstanceState != null) {
             savedInstanceState.getBundle(paletteKey)!!
