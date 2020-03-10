@@ -30,7 +30,8 @@ class ColorsAdapter(private val context: Context) : RecyclerView.Adapter<ColorsA
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val button = itemView.findViewById<Button>(R.id.coloredButton).apply {
-            setOnLongClickListener  { startDragging(it, colors[adapterPosition]); true }
+            // TODO: Simpler mode
+            setOnClickListener { startDragging(it, colors[adapterPosition]) }
         }
 
         fun bindTo(position: Int) {
