@@ -60,7 +60,7 @@ class PaletteEditorController(private val activity: AppCompatActivity, private v
 
         val color = model.colorAt(fromCol, fromRow)
 
-        if(model.isColorPoint(fromCol, fromRow)) {
+        if(model.isColorPoint(fromCol, fromRow) && !model.isColorPoint(toCol, toRow)) {
             model.removeColorPoint(fromCol, fromRow)
         }
 
