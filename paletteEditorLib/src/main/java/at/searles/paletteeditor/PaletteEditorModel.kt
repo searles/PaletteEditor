@@ -1,11 +1,10 @@
 package at.searles.paletteeditor
 
-import android.util.SparseArray
-import androidx.core.util.containsKey
 import at.searles.commons.color.Lab
 import at.searles.commons.color.Palette
 import at.searles.commons.color.Rgb
 import at.searles.commons.util.IntIntMap
+import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
 
@@ -31,13 +30,13 @@ class PaletteEditorModel {
 
     var offsetX: Float = 0f
         set(value) {
-            field = max(0f, min(value, 1f))
+            field = value - floor(value)
             listeners.forEach { it.onOffsetChanged() }
         }
 
     var offsetY: Float = 0f
         set(value) {
-            field = max(0f, min(value, 1f))
+            field = value - floor(value)
             listeners.forEach { it.onOffsetChanged() }
         }
 
