@@ -1,8 +1,10 @@
 package at.searles.multiscrollview
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Canvas
 import android.util.AttributeSet
+import android.util.DisplayMetrics
 import android.view.DragEvent
 import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
@@ -14,12 +16,13 @@ import android.widget.ScrollView
 import at.searles.paletteeditor.R
 import java.util.*
 
+
 /**
  * Thanks to http://stackoverflow.com/questions/12074950/android-horizontalscrollview-inside-scrollview
  */
 class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayout(context, attributeSet) {
 
-    private var borderScrollMargin = 128f // FIXME dp-dependant
+    private var borderScrollMargin = dpToPix(context.resources, borderScrollMarginDp)
 
     private val initialBorderScrollStepSize
         get() = borderScrollMargin / 5f
@@ -180,7 +183,6 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
     }
 
     fun updateSize() {
-        // FIXME scroll a bit to indicate that the number of rows/columns has changed.
         hspace.minimumWidth = innerPaneView.intendedWidth.toInt()
         hspace.layoutParams.width = innerPaneView.intendedWidth.toInt()
 
@@ -211,5 +213,13 @@ class MultiScrollView(context: Context, attributeSet: AttributeSet) : LinearLayo
         override fun onLongPress(e: MotionEvent) {
             innerPaneView.onLongPress(e)
         }
+    }
+
+    companion object {
+        private fun dpToPix(resources: Resources, dp: Float): Float {
+            return dp * (resources.displayMetrics.densityDpi.toFloat() / DisplayMetrics.DENSITY_DEFAULT)
+        }
+
+        private val borderScrollMarginDp = 96f
     }
 }

@@ -22,7 +22,6 @@ import at.searles.paletteeditor.ThemeUtils
 import kotlin.math.max
 import kotlin.math.min
 
-// TODO Bad color hook
 class PaletteEditorPane(private val rootView: InnerPaneView, val model: PaletteEditorModel): InnerPane {
 
     val iconSize: Float = Dpis.dpiToPx(

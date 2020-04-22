@@ -5,7 +5,6 @@ import at.searles.commons.color.Lab
 import at.searles.commons.color.Palette
 import at.searles.commons.color.Rgb
 import at.searles.commons.util.IntIntMap
-import kotlin.math.floor
 
 class PaletteEditorModel {
     private val listeners = ArrayList<Listener>()
@@ -75,9 +74,7 @@ class PaletteEditorModel {
     fun setColorPoint(col: Int, row: Int, rgb: Int) {
         require(col >= 0 && row >= 0)
 
-        val argb = if((rgb and alphaMask) == 0) alphaMask or rgb else rgb
-
-        colorPoints[col, row] = Rgb.of(argb).toLab()
+        colorPoints[col, row] = Rgb.of(rgb).toLab()
 
         updateInterpolatedColors()
         listeners.forEach { it.onColorsChanged() }
@@ -124,9 +121,5 @@ class PaletteEditorModel {
         fun onOffsetChanged()
         fun onColorsChanged()
         fun onSelectionChanged()
-    }
-
-    companion object {
-        private const val alphaMask = 0xff000000.toInt()
     }
 }
