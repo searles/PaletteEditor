@@ -2,5 +2,6 @@
           package="at.searles.paletteeditor">
     <application>
         <activity android:name=".PaletteEditorActivity"/>
+        <activity android:name=".storage.PaletteStorageManageActivity" />
     </application>
 </manifest>
