@@ -50,6 +50,7 @@ class PaletteEditorActivity : StorageEditorCallback<Palette>, AppCompatActivity(
     private lateinit var controller: PaletteEditorController
 
     override lateinit var storageEditor: StorageEditor<Palette>
+    override lateinit var storageProvider: StorageProvider
 
     override var value: Palette
         get() = model.createPalette()
@@ -68,7 +69,8 @@ class PaletteEditorActivity : StorageEditorCallback<Palette>, AppCompatActivity(
             intent.getBundleExtra(paletteKey)
         }
 
-        storageEditor = PaletteStorageEditor(this, StorageProvider(directoryName, this), this)
+        storageProvider = StorageProvider(directoryName, this)
+        storageEditor = PaletteStorageEditor(this, storageProvider, this)
         storageEditor.onRestoreInstanceState(savedInstanceState)
 
         initializePaletteModel(PaletteAdapter.toPalette(paletteBundle))
